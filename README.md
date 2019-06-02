@@ -1,28 +1,40 @@
-# This Source not working yet now !!!
+# This Source is WIP. not working yet now !!
 
 # ModSecurity-Go
-ModSecurity middleware for go
+ModSecurity-Go is golang port for [ModSecurity](https://github.com/SpiderLabs/ModSecurity).
 
-# Dependency
+Project is Working in progress.
 
-* [LibModSecurity](https://github.com/SpiderLabs/ModSecurity/tree/libmodsecurity) 
+The current goal is to implement [ModSecurity Rules Language Porting Specification](https://github.com/SpiderLabs/ModSecurity/wiki/ModSecurity-Rules-Language-Porting-Specification)[Level 1](https://github.com/SpiderLabs/ModSecurity/wiki/ModSecurity-Rules-Language-Porting-Specification#level-1-core-features)
 
-# Install 
+TODO:
 
-[Install Guide](https://github.com/senghoo/modsecurity-go/blob/master/doc/install.md)
+- [ ] SecLang Lexer (WIP)
+- [ ] SecLang parser
+- [ ] Implement SecLang [Level 1](https://github.com/SpiderLabs/ModSecurity/wiki/ModSecurity-Rules-Language-Porting-Specification#level-1-core-features)
+- [ ] Compatible with [OWASP](https://github.com/SpiderLabs/owasp-modsecurity-crs)
+
 
 # Usage 
 
-## LibModSecurity
+## Lexer(WIP)
 
 ```
-libmodsecurity := NewLibModSecurity()
-libmodsecurity.addRule("...")
 
-trans := libmodsecurity.NewTransaction()
-trans.ProcessConnection("192.168.1.2","www.example.com", 55332, 80)
-trans.ProcessURL("/a.php?test=test", "GET ", 1, 1)
-trans.ProcessRequestHeader()
-checkThis :=  trans.Intervention() 
-
+	lex := seclang.NewSecLangLex()
+    rules := "<<modsecurity rules>>"
+	scan, err := lex.Scanner([]byte(rules))
+	if err != nil {
+		panic(err)
+	}
+	for {
+		tok, err, eos := scan.Next()
+		if err != nil {
+			panic(err)
+		}
+		if eos {
+			break
+		}
+		fmt.Printf("Got token %#v", tok)
+	}
 ```

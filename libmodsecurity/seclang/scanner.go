@@ -12,6 +12,8 @@ import (
 	"github.com/timtadh/lexmachine/machines"
 )
 
+var DEBUG = false
+
 const (
 	StateInit = iota
 )
@@ -60,6 +62,12 @@ func (l *Lexer) AddStringI(state int, s string, action Action) {
 
 func (l *Lexer) Compile() error {
 	for idx, pattern := range l.states {
+		if DEBUG {
+			fmt.Printf("state: %d\n", idx)
+			for _, p := range pattern {
+				fmt.Printf("pattern: %s\n", string(p.regex))
+			}
+		}
 		dfa, err := compile(pattern)
 		if err != nil {
 			return err
