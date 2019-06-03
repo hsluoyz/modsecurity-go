@@ -10,14 +10,21 @@ type expect struct {
 }
 
 func TestSecLangLexComnands(t *testing.T) {
-	DEBUG = true
+	DEBUG = false
 	defer func() { DEBUG = false }()
 	lex := NewSecLangLex()
 	datas := map[string]expect{
-		`SecComponentSignature "core ruleset/2.1.3"`: {TkConfigComponentSig, `core ruleset/2.1.3`},
-		`SecServerSignature "Microsoft-IIS/6.0"`:     {TkConfigSecServerSig, `Microsoft-IIS/6.0`},
-		`SecWebAppId "WebApp1"`:                      {TkConfigSecWebAppId, `WebApp1`},
-		`SecWebAppId "WebApp1\nnewline"`:             {TkConfigSecWebAppId, `WebApp1\nnewline`},
+		`SecComponentSignature "core ruleset/2.1.3"`:         {TkConfigComponentSig, `core ruleset/2.1.3`},
+		`SecServerSignature "Microsoft-IIS/6.0"`:             {TkConfigSecServerSig, `Microsoft-IIS/6.0`},
+		`SecWebAppId "WebApp1"`:                              {TkConfigSecWebAppId, `WebApp1`},
+		`SecWebAppId "WebApp1\nnewline"`:                     {TkConfigSecWebAppId, `WebApp1\nnewline`},
+		`SecContentInjection On`:                             {TkConfigContentInjection, `SecContentInjection`},
+		`SecAuditLogDirMode 02750`:                           {TkConfigDirAuditDirMod, `02750`},
+		`SecAuditLogDirMode "02750"`:                         {TkConfigDirAuditDirMod, `02750`},
+		`SecAuditLogStorageDir /usr/local/apache/logs/audit`: {TkConfigDirAuditDir, `/usr/local/apache/logs/audit`},
+		`SecAuditLogStorageDir "logs/audit"`:                 {TkConfigDirAuditDir, `logs/audit`},
+		`SecArgumentSeparator &`:                             {TkConfigSecArgumentSeparator, `&`},
+		`SecArgumentSeparator "#"`:                           {TkConfigSecArgumentSeparator, `#`},
 	}
 	for rule, exp := range datas {
 		scan, err := lex.Scanner([]byte(rule))

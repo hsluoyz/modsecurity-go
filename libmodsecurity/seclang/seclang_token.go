@@ -779,7 +779,14 @@ func TokenMakerArgStripQuotes(i int) func(*Scanner, *machines.Match) (interface{
 	}
 }
 
-// LIQFreeTextArg adds a case insensitive token token, get an double quoted TextArg as tokens value
+// LI adds a case insensitive token to lexer
+// L: Prefix
+// I: Case insensitive
+func LI(l *Lexer, state, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk)), TokenMaker(tk))
+}
+
+// LIQFreeTextArg adds a case insensitive token to lexer, get an double quoted TextArg as tokens value
 // L: Prefix
 // I: Case insensitive
 // Q: Double Quoted Argment
@@ -787,6 +794,25 @@ func TokenMakerArgStripQuotes(i int) func(*Scanner, *machines.Match) (interface{
 func LIQFreeTextArg(l *Lexer, state, tk int) {
 	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkFreeText)+`["]`, TokenMakerArgStripQuotes(tk))
 }
+
+func LIQNumberArg(l *Lexer, state, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkConfigValueNumber)+`["]`, TokenMakerArgStripQuotes(tk))
+}
+
+func LINumberArg(l *Lexer, state, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkConfigValueNumber), TokenMakerArgStripQuotes(tk))
+}
+func LIQPathArg(l *Lexer, state, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkConfigValuePath)+`["]`, TokenMakerArgStripQuotes(tk))
+}
+
+func LIPathArg(l *Lexer, state, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkConfigValuePath), TokenMakerArgStripQuotes(tk))
+}
+
 func LIFreeTextNewLineArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+"[ \t]"+TkRegex(TkFreeTextNewLine), TokenMakerArgStripQuotes(tk))
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkFreeTextNewLine), TokenMakerArgStripQuotes(tk))
+}
+func LIQFreeTextNewLineArg(l *Lexer, state, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkFreeTextNewLine)+`["]`, TokenMakerArgStripQuotes(tk))
 }

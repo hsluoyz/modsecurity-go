@@ -5,7 +5,7 @@ ModSecurity-Go is golang port for [ModSecurity](https://github.com/SpiderLabs/Mo
 
 Project is Working in progress.
 
-The current goal is to implement [ModSecurity Rules Language Porting Specification](https://github.com/SpiderLabs/ModSecurity/wiki/ModSecurity-Rules-Language-Porting-Specification)[Level 1](https://github.com/SpiderLabs/ModSecurity/wiki/ModSecurity-Rules-Language-Porting-Specification#level-1-core-features)
+The current goal is to implement [ModSecurity Rules Language Porting Specification](https://github.com/SpiderLabs/ModSecurity/wiki/ModSecurity-Rules-Language-Porting-Specification) [Level 1](https://github.com/SpiderLabs/ModSecurity/wiki/ModSecurity-Rules-Language-Porting-Specification#level-1-core-features)
 
 TODO:
 

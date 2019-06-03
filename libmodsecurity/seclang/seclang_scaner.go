@@ -13,5 +13,12 @@ func NewSecLangLex() *Lexer {
 	LIQFreeTextArg(lex, StateInit, TkConfigSecServerSig)
 	LIQFreeTextArg(lex, StateInit, TkConfigSecWebAppId)
 	LIFreeTextNewLineArg(lex, StateInit, TkConfigSecWebAppId)
+	LI(lex, StateInit, TkConfigContentInjection)
+	LIQNumberArg(lex, StateInit, TkConfigDirAuditDirMod)
+	LINumberArg(lex, StateInit, TkConfigDirAuditDirMod)
+	LIQPathArg(lex, StateInit, TkConfigDirAuditDir)
+	LIPathArg(lex, StateInit, TkConfigDirAuditDir)
+	LIQFreeTextNewLineArg(lex, StateInit, TkConfigSecArgumentSeparator)
+	LIFreeTextNewLineArg(lex, StateInit, TkConfigSecArgumentSeparator)
 	return lex
 }
