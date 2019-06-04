@@ -332,14 +332,14 @@ const (
 	TkConfigValueSerial
 	TkConfigValueWarn
 	TkConfigXmlExternalEntity
-	TkCongigDirResponseBodyMp
-	TkCongigDirResponseBodyMpClear
-	TkCongigDirSecArgSep
-	TkCongigDirSecCookieFormat
+	TkConfigDirResponseBodyMp
+	TkConfigDirResponseBodyMpClear
+	TkConfigDirSecArgSep
+	TkConfigDirSecCookieFormat
 	TkConfigSecCookiev0Separator
-	TkCongigDirSecDataDir
-	TkCongigDirSecStatusEngine
-	TkCongigDirSecTmpDir
+	TkConfigDirSecDataDir
+	TkConfigDirSecStatusEngine
+	TkConfigDirSecTmpDir
 	TkDictElement
 	TkDictElementWithPipe
 	TkDictElementNoPipe
@@ -380,6 +380,8 @@ const (
 	TkEquals
 	TkEqualsPlus
 	TkEqualsMinus
+	TkQuotationMark
+	TkComma
 )
 
 var TkRegexMap = map[int]string{
@@ -704,14 +706,14 @@ var TkRegexMap = map[int]string{
 	TkConfigValueSerial:                      `(Serial)`,
 	TkConfigValueWarn:                        `(Warn)`,
 	TkConfigXmlExternalEntity:                `(SecXmlExternalEntity)`,
-	TkCongigDirResponseBodyMp:                `(SecResponseBodyMimeType)`,
-	TkCongigDirResponseBodyMpClear:           `(SecResponseBodyMimeTypesClear)`,
-	TkCongigDirSecArgSep:                     `(SecArgumentSeparator)`,
-	TkCongigDirSecCookieFormat:               `(SecCookieFormat)`,
+	TkConfigDirResponseBodyMp:                `(SecResponseBodyMimeType)`,
+	TkConfigDirResponseBodyMpClear:           `(SecResponseBodyMimeTypesClear)`,
+	TkConfigDirSecArgSep:                     `(SecArgumentSeparator)`,
+	TkConfigDirSecCookieFormat:               `(SecCookieFormat)`,
 	TkConfigSecCookiev0Separator:             `(SecCookieV0Separator)`,
-	TkCongigDirSecDataDir:                    `(SecDataDir)`,
-	TkCongigDirSecStatusEngine:               `(SecStatusEngine)`,
-	TkCongigDirSecTmpDir:                     `(SecTmpDir)`,
+	TkConfigDirSecDataDir:                    `(SecDataDir)`,
+	TkConfigDirSecStatusEngine:               `(SecStatusEngine)`,
+	TkConfigDirSecTmpDir:                     `(SecTmpDir)`,
 	TkDictElement:                            `([^\"|,\n \t}=]|([^\\]\\\"))+`,
 	TkDictElementWithPipe:                    `[^ =\t"]+`,
 	TkDictElementNoPipe:                      `[^ =\|\t"]+`,
@@ -778,6 +780,9 @@ func TokenMakerArgStripQuotes(i int) func(*Scanner, *machines.Match) (interface{
 		return scan.Token(i, []byte(str), match), nil
 	}
 }
+func Skip(scan *Scanner, match *machines.Match) (interface{}, error) {
+	return nil, nil
+}
 
 // LI adds a case insensitive token to lexer
 // L: Prefix
@@ -793,6 +798,9 @@ func LI(l *Lexer, state, tk int) {
 // TextArg: Argment is TextArg
 func LIQFreeTextArg(l *Lexer, state, tk int) {
 	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkFreeText)+`["]`, TokenMakerArgStripQuotes(tk))
+}
+func LIFreeTextArg(l *Lexer, state, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkFreeText), TokenMakerArgStripQuotes(tk))
 }
 
 func LIQNumberArg(l *Lexer, state, tk int) {
@@ -815,4 +823,24 @@ func LIFreeTextNewLineArg(l *Lexer, state, tk int) {
 }
 func LIQFreeTextNewLineArg(l *Lexer, state, tk int) {
 	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkFreeTextNewLine)+`["]`, TokenMakerArgStripQuotes(tk))
+}
+func LINewLineFreeTextArg(l *Lexer, state, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkNewLineFreeText), TokenMakerArgStripQuotes(tk))
+}
+func LIQNewLineFreeTextArg(l *Lexer, state, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkNewLineFreeText)+`["]`, TokenMakerArgStripQuotes(tk))
+}
+
+func LIRegexArg(l *Lexer, state, regno, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(regno), TokenMakerArgStripQuotes(tk))
+}
+func LIQRegexArg(l *Lexer, state, regno, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(regno)+`["]`, TokenMakerArgStripQuotes(tk))
+}
+
+func LIFreeTextNewNumberLineArg(l *Lexer, state, tk int) {
+	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkFreeTextNewLine)+`[ ]+`+TkRegex(TkConfigValueNumber), TokenMakerArgStripQuotes(tk))
+}
+func LSkip(l *Lexer, state int, reg string) {
+	l.AddString(state, reg, Skip)
 }
