@@ -821,6 +821,7 @@ func LIPathArg(l *Lexer, state, tk int) {
 func LIFreeTextNewLineArg(l *Lexer, state, tk int) {
 	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkFreeTextNewLine), TokenMakerArgStripQuotes(tk))
 }
+
 func LIQFreeTextNewLineArg(l *Lexer, state, tk int) {
 	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkFreeTextNewLine)+`["]`, TokenMakerArgStripQuotes(tk))
 }
@@ -841,6 +842,39 @@ func LIQRegexArg(l *Lexer, state, regno, tk int) {
 func LIFreeTextNewNumberLineArg(l *Lexer, state, tk int) {
 	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkFreeTextNewLine)+`[ ]+`+TkRegex(TkConfigValueNumber), TokenMakerArgStripQuotes(tk))
 }
+
+func LISQFreeTextNewLineArg(l *Lexer, state, tk, newState ...int) {
+	l.AddString(
+		StateInit,
+		toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkFreeTextNewLine)+`["]`,
+		func(scan *Scanner, match *machines.Match) (interface{}, error) {
+			f := TokenMakerArgStripQuotes(tk)
+			scan.ToState(newState...)
+			return f(scan, match)
+		})
+}
+
+func LISFreeTextSpaceCommaQuoteArg(l *Lexer, state, tk, newState ...int) {
+	l.AddString(
+		StateInit,
+		toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkFreeTextSpaceCommaQuote),
+		func(scan *Scanner, match *machines.Match) (interface{}, error) {
+			f := TokenMakerArgStripQuotes(tk)
+			scan.ToState(newState...)
+			return f(scan, match)
+		})
+}
+func LIS(l *Lexer, state, tk, newState ...int) {
+	l.AddString(
+		StateInit,
+		toCaseInsensitiveRegex(TkRegex(tk)),
+		func(scan *Scanner, match *machines.Match) (interface{}, error) {
+			f := TokenMaker(tk)
+			scan.ToState(newState...)
+			return f(scan, match)
+		})
+}
+
 func LSkip(l *Lexer, state int, reg string) {
 	l.AddString(state, reg, Skip)
 }

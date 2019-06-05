@@ -38,7 +38,7 @@ type Scanner struct {
 	sColumn int
 	eLine   int
 	eColumn int
-	state   int
+	states  *StateStack
 }
 
 func NewLexer() *Lexer {
@@ -90,9 +90,10 @@ func (l *Lexer) Scanner(text []byte) (*Scanner, error) {
 	// prevent the user from modifying the text under scan
 	// textCopy := make([]byte, len(text))
 	return &Scanner{
-		lexer: l,
-		Text:  text,
-		TC:    0,
+		lexer:  l,
+		Text:   text,
+		TC:     0,
+		states: NewStateStack(),
 	}, nil
 }
 
@@ -104,9 +105,9 @@ func (s *Scanner) Next() (tok interface{}, err error, eos bool) {
 		return nil, fmt.Errorf("state[dfa]: %d not found", s.state), false
 	}
 
-	patterns, has := s.lexer.states[s.state]
+	patterns, has := s.lexer.states[s.State()]
 	if !has || patterns == nil {
-		return nil, fmt.Errorf("state[state] %d not found", s.state), false
+		return nil, fmt.Errorf("state[state] %d not found", s.State()), false
 	}
 
 	scan := machines.DFALexerEngine(
@@ -141,8 +142,18 @@ func (s *Scanner) Next() (tok interface{}, err error, eos bool) {
 	return token, nil, false
 }
 
-func (s *Scanner) SetState(n int) {
-	s.state = n
+func (s *Scanner) ToState(n ...int) {
+	for i := len(n) - 1; i >= 0; i-- {
+		s.states.Push(n[i])
+	}
+}
+
+func (s *Scanner) State() int {
+	return s.states.Top()
+}
+
+func (s *Scanner) FinishState() {
+	s.states.Pop()
 }
 
 func compile(patterns []*pattern) (*dfapkg.DFA, error) {

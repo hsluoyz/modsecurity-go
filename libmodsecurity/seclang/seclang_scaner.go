@@ -2,6 +2,12 @@ package seclang
 
 import "github.com/timtadh/lexmachine/machines"
 
+const (
+	StateVariable = StateInit + iota
+	StateOpertaion
+	StateAction
+)
+
 // NewSecLangLex generate new SecLang Lexer
 func NewSecLangLex() *Lexer {
 	lex := NewLexer()
@@ -9,6 +15,7 @@ func NewSecLangLex() *Lexer {
 	lex.Add(StateInit, []byte("( |\t|\n|\r)+"), func(scan *Scanner, match *machines.Match) (interface{}, error) {
 		return nil, nil
 	})
+	// TODO: reduce lexer item
 	LIQFreeTextArg(lex, StateInit, TkConfigComponentSig)
 	LIQFreeTextArg(lex, StateInit, TkConfigSecServerSig)
 	LIQFreeTextArg(lex, StateInit, TkConfigSecWebAppId)
@@ -114,19 +121,20 @@ func NewSecLangLex() *Lexer {
 	LSkip(lex, StateInit, `\r`)
 	lex.AddString(StateInit, `["]`, TokenMaker(TkQuotationMark))
 	lex.AddString(StateInit, `[,]`, TokenMaker(TkComma))
-	// {CONFIG_SEC_UPDATE_TARGET_BY_TAG}[ \t]+["]{FREE_TEXT_NEW_LINE}["]         { state_variable_from = 1; BEGIN(TRANSACTION_TO_VARIABLE); return p::make_CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG(parserSanitizer(strchr(yytext, ' ') + 1), *driver.loc.back()); }
-	// {CONFIG_SEC_UPDATE_TARGET_BY_TAG}[ \t]+{FREE_TEXT_SPACE_COMMA_QUOTE}      { state_variable_from = 1; BEGIN(TRANSACTION_TO_VARIABLE); return p::make_CONFIG_SEC_RULE_UPDATE_TARGET_BY_TAG(parserSanitizer(strchr(yytext, ' ') + 1), *driver.loc.back()); }
-	// {CONFIG_SEC_UPDATE_TARGET_BY_MSG}[ \t]+["]{FREE_TEXT_NEW_LINE}["]         { state_variable_from = 1; BEGIN(TRANSACTION_TO_VARIABLE); return p::make_CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG(parserSanitizer(strchr(yytext, ' ') + 1), *driver.loc.back()); }
-	// {CONFIG_SEC_UPDATE_TARGET_BY_MSG}[ \t]+{FREE_TEXT_SPACE_COMMA_QUOTE}      { state_variable_from = 1; BEGIN(TRANSACTION_TO_VARIABLE); return p::make_CONFIG_SEC_RULE_UPDATE_TARGET_BY_MSG(parserSanitizer(strchr(yytext, ' ') + 1), *driver.loc.back()); }
-	// {CONFIG_SEC_UPDATE_TARGET_BY_ID}[ \t]+["]{FREE_TEXT_NEW_LINE}["]          { state_variable_from = 1; BEGIN(TRANSACTION_TO_VARIABLE); return p::make_CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID(parserSanitizer(strchr(yytext, ' ') + 1), *driver.loc.back()); }
-	// {CONFIG_SEC_UPDATE_TARGET_BY_ID}[ \t]+{FREE_TEXT_SPACE_COMMA_QUOTE}       { state_variable_from = 1; BEGIN(TRANSACTION_TO_VARIABLE); return p::make_CONFIG_SEC_RULE_UPDATE_TARGET_BY_ID(parserSanitizer(strchr(yytext, ' ') + 1), *driver.loc.back()); }
-	// {CONFIG_SEC_UPDATE_ACTION_BY_ID}[ \t]+["]{FREE_TEXT_NEW_LINE}["]          { BEGIN(TRANSACTION_FROM_OPERATOR_TO_ACTIONS); return p::make_CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID(parserSanitizer(strchr(yytext, ' ') + 1), *driver.loc.back()); }
-	// {CONFIG_SEC_UPDATE_ACTION_BY_ID}[ \t]+{FREE_TEXT_SPACE_COMMA_QUOTE}       { BEGIN(TRANSACTION_FROM_OPERATOR_TO_ACTIONS); return p::make_CONFIG_SEC_RULE_UPDATE_ACTION_BY_ID(parserSanitizer(strchr(yytext, ' ') + 1), *driver.loc.back()); }
-	// {DIRECTIVE_SECRULESCRIPT}[ \t]+{CONFIG_VALUE_PATH}                      { BEGIN(TRANSACTION_FROM_DIRECTIVE_TO_ACTIONS); return p::make_DIRECTIVE_SECRULESCRIPT(parserSanitizer(strchr(yytext, ' ') + 1), *driver.loc.back()); }
-	// {DIRECTIVE_SECRULESCRIPT}[ \t]+["]{FREE_TEXT_SPACE_COMMA_QUOTE}["]      { BEGIN(TRANSACTION_FROM_DIRECTIVE_TO_ACTIONS); return p::make_DIRECTIVE_SECRULESCRIPT(parserSanitizer(strchr(yytext, ' ') + 1), *driver.loc.back()); }
+	LISQFreeTextNewLineArg(lex, StateInit, TkConfigSecUpdateTargetByTag, StateVariable)
+	LISFreeTextSpaceCommaQuoteArg(lex, StateInit, TkConfigSecUpdateTargetByTag, StateVariable)
+	LISQFreeTextNewLineArg(lex, StateInit, TkConfigSecUpdateTargetByMsg, StateVariable)
+	LISFreeTextSpaceCommaQuoteArg(lex, StateInit, TkConfigSecUpdateTargetByMsg, StateVariable)
+	LISQFreeTextNewLineArg(lex, StateInit, TkConfigSecUpdateTargetById, StateVariable)
+	LISFreeTextSpaceCommaQuoteArg(lex, StateInit, TkConfigSecUpdateTargetById, StateVariable)
+	LISQFreeTextNewLineArg(lex, StateInit, TkConfigSecUpdateActionById, StateVariable)
+	LISFreeTextSpaceCommaQuoteArg(lex, StateInit, TkConfigSecUpdateActionById, StateVariable)
 	// {DIRECTIVE}                                                             { BEGIN(TRANSACTION_TO_VARIABLE); return p::make_DIRECTIVE(yytext, *driver.loc.back()); }
+	LIS(lex, StateInit, TkDirective, StateVariable, StateOpertaion, StateAction)
 	// {CONFIG_DIR_SEC_DEFAULT_ACTION}                                         { BEGIN(TRANSACTION_FROM_DIRECTIVE_TO_ACTIONS); return p::make_CONFIG_DIR_SEC_DEFAULT_ACTION(yytext, *driver.loc.back()); }
+	LIS(lex, StateInit, TkConfigDirSecDefaultAction, StateAction)
 	// {CONFIG_DIR_SEC_ACTION}                                                 { BEGIN(TRANSACTION_FROM_DIRECTIVE_TO_ACTIONS); return p::make_CONFIG_DIR_SEC_ACTION(yytext, *driver.loc.back()); }
+	LIS(lex, StateInit, TkConfigDirSecAction, StateAction)
 	// #[ \t]*SecRule[^\\].*\\[ \t]*[\r\n]*                                    { driver.loc.back()->lines(1); driver.loc.back()->step(); BEGIN(COMMENT); }
 	// #[ \t]*SecAction[^\\].*\\[ \t]*[^\\n]                                   { driver.loc.back()->lines(1); driver.loc.back()->step(); BEGIN(COMMENT);  }
 	return lex
