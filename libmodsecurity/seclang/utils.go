@@ -1,6 +1,11 @@
 package seclang
 
-import "sync"
+import (
+	"fmt"
+	"strings"
+	"sync"
+	"unicode"
+)
 
 type StateStack struct {
 	items []int
@@ -37,4 +42,41 @@ func (s *StateStack) Top() int {
 	s.lock.Unlock()
 	return item
 
+}
+
+func toCaseInsensitiveRegex(s string) string {
+	var b strings.Builder
+	for _, l := range s {
+		lower := unicode.ToLower(l)
+		upper := unicode.ToUpper(l)
+		if lower == upper {
+			b.WriteRune(l)
+		} else {
+			b.WriteString("[")
+			b.WriteRune(lower)
+			b.WriteRune(upper)
+			b.WriteString("]")
+		}
+	}
+	return b.String()
+}
+
+func quotedOrNot(s string) string {
+	return fmt.Sprintf(`((["]%s")|(%s))`, s, s)
+}
+
+func namedRegex(name, s string) string {
+	return fmt.Sprintf("(?P<%s>%s)", name, s)
+}
+
+func removeQuotes(str string) string {
+	str = strings.TrimSpace(str)
+	for {
+		if strlen := len(str); strlen >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
+			str = str[1 : strlen-1]
+		} else {
+			break
+		}
+	}
+	return str
 }

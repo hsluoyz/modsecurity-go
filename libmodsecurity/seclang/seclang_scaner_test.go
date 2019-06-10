@@ -6,25 +6,25 @@ import (
 
 type expect struct {
 	tk  int
-	str string
+	str []string
 }
 
 func TestSecLangLexComnands(t *testing.T) {
-	DEBUG = false
+	DEBUG = true
 	defer func() { DEBUG = false }()
 	lex := NewSecLangLex()
 	datas := map[string]expect{
-		`SecComponentSignature "core ruleset/2.1.3"`:         {TkConfigComponentSig, `core ruleset/2.1.3`},
-		`SecServerSignature "Microsoft-IIS/6.0"`:             {TkConfigSecServerSig, `Microsoft-IIS/6.0`},
-		`SecWebAppId "WebApp1"`:                              {TkConfigSecWebAppId, `WebApp1`},
-		`SecWebAppId "WebApp1\nnewline"`:                     {TkConfigSecWebAppId, `WebApp1\nnewline`},
-		`SecContentInjection On`:                             {TkConfigContentInjection, `SecContentInjection`},
-		`SecAuditLogDirMode 02750`:                           {TkConfigDirAuditDirMod, `02750`},
-		`SecAuditLogDirMode "02750"`:                         {TkConfigDirAuditDirMod, `02750`},
-		`SecAuditLogStorageDir /usr/local/apache/logs/audit`: {TkConfigDirAuditDir, `/usr/local/apache/logs/audit`},
-		`SecAuditLogStorageDir "logs/audit"`:                 {TkConfigDirAuditDir, `logs/audit`},
-		`SecArgumentSeparator &`:                             {TkConfigSecArgumentSeparator, `&`},
-		`SecArgumentSeparator "#"`:                           {TkConfigSecArgumentSeparator, `#`},
+		`SecComponentSignature "core ruleset/2.1.3"`:         {TkConfigComponentSig, []string{`core ruleset/2.1.3`}},
+		`SecServerSignature "Microsoft-IIS/6.0"`:             {TkConfigSecServerSig, []string{`Microsoft-IIS/6.0`}},
+		`SecWebAppId "WebApp1"`:                              {TkConfigSecWebAppId, []string{`WebApp1`}},
+		`SecWebAppId "WebApp1\nnewline"`:                     {TkConfigSecWebAppId, []string{`WebApp1\nnewline`}},
+		`SecContentInjection On`:                             {TkConfigContentInjection, []string{}},
+		`SecAuditLogDirMode 02750`:                           {TkConfigDirAuditDirMod, []string{`02750`}},
+		`SecAuditLogDirMode "02750"`:                         {TkConfigDirAuditDirMod, []string{`02750`}},
+		`SecAuditLogStorageDir /usr/local/apache/logs/audit`: {TkConfigDirAuditDir, []string{`/usr/local/apache/logs/audit`}},
+		`SecAuditLogStorageDir "logs/audit"`:                 {TkConfigDirAuditDir, []string{`logs/audit`}},
+		`SecArgumentSeparator &`:                             {TkConfigSecArgumentSeparator, []string{`&`}},
+		`SecArgumentSeparator "#"`:                           {TkConfigSecArgumentSeparator, []string{`#`}},
 	}
 	for rule, exp := range datas {
 		scan, err := lex.Scanner([]byte(rule))
@@ -46,9 +46,15 @@ func TestSecLangLexComnands(t *testing.T) {
 			t.Errorf("expected %s[%d], got %s", TkRegex(exp.tk), exp.tk, token.String())
 			return
 		}
-		if string(token.Value.([]byte)) != exp.str {
-			t.Errorf("expected %s[%d] val: %s, got %s", TkRegex(exp.tk), exp.tk, exp.str, token.String())
+		if len(exp.str) != len(token.Value) {
+			t.Errorf("expected %s[%d] val: %q, got %q", TkRegex(exp.tk), exp.tk, exp.str, token.Value)
 			return
+		}
+		for idx, str := range exp.str {
+			if token.Value[idx].(string) != str {
+				t.Errorf("expected %s[%d] val: %s, got %s", TkRegex(exp.tk), exp.tk, exp.str, token.String())
+				return
+			}
 		}
 	}
 }

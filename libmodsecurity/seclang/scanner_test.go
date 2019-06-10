@@ -17,14 +17,14 @@ func TestSimpleSecRule(t *testing.T) {
 	)
 	lex := NewLexer()
 	lex.AddString(StateInit, "SecRule", func(scan *Scanner, match *machines.Match) (interface{}, error) {
-		scan.SetState(StateSecRule)
-		return scan.Token(TkSecRule, "SecRule", match), nil
+		scan.ToState(StateSecRule)
+		return scan.Token(TkSecRule, match, "SecRule"), nil
 	})
 	lex.Add(StateInit, []byte("( |\t|\n|\r)+"), func(scan *Scanner, match *machines.Match) (interface{}, error) {
 		return nil, nil
 	})
 	lex.AddString(StateSecRule, "FULL_REQUEST", func(scan *Scanner, match *machines.Match) (interface{}, error) {
-		return scan.Token(TkFullRequest, "FULL_REQUEST", match), nil
+		return scan.Token(TkFullRequest, match, "FULL_REQUEST"), nil
 	})
 	lex.Add(StateSecRule, []byte("( |\t|\n|\r)+"), func(scan *Scanner, match *machines.Match) (interface{}, error) {
 		return nil, nil
@@ -46,7 +46,7 @@ func TestSimpleSecRule(t *testing.T) {
 		if eos {
 			t.Errorf("unexpected eos, token :%s", token.String())
 		}
-		if token.Value.(string) != e {
+		if token.Value[0].(string) != e {
 			t.Errorf("Want %s, get :%s", e, token.Value)
 		}
 		fmt.Println(token.String())

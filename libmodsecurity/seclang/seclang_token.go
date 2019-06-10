@@ -2,13 +2,17 @@ package seclang
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
-	"unicode"
 
 	"github.com/timtadh/lexmachine/machines"
 )
 
 const TkStart = 128
+const (
+	freetextRegex   = `(([^"\n\\]|(\\.)|(\\\n))+)`
+	charactersRegex = `([^, \t\"\n\r]+)`
+)
 
 const (
 	TkActionAccuracy = iota + TkStart
@@ -349,27 +353,11 @@ const (
 	TkDictElementTwo2
 	TkDirective
 	TkDirectiveSecrulescript
-	TkFreeTextNewLine
-	TkFreeTextQuote
 	TkQuoteButScaped
 	TkDoubleQuoteButScaped
 	TkCommaButScaped
-	TkFreeTextQuoteMacroExpansion
-	TkFreeTextDoubleQuoteMacroExpansion
-	TkFreeTextEqualsMacroExpansion
-	TkFreeTextEqualsQuoteMacroExpansion
-	TkFreeTextCommaMacroExpansion
-	TkFreeTextCommaDoubleQuoteMacroExpansion
-	TkFreeTextSpaceMacroExpansion
 	TkStartMacroVariable
-	TkFreeTextQuoteComma
-	TkFreeTextSpace
-	TkFreeTextSpaceComma
-	TkFreeTextSpaceCommaQuote
-	TkFreeTextCommaQuote
-	TkNewLineFreeText
 	TkNot
-	TkFreeText
 	TkRemoveRuleBy
 	TkVarFreeTextQuote
 	TkVarFreeTextSpace
@@ -382,6 +370,9 @@ const (
 	TkEqualsMinus
 	TkQuotationMark
 	TkComma
+	TkFreeText
+	TkCharacters
+	TkArgument
 )
 
 var TkRegexMap = map[int]string{
@@ -723,37 +714,21 @@ var TkRegexMap = map[int]string{
 	TkDictElementTwo2:                        `[A-Za-z_ -\%\{\.\}\-\/]+`,
 	TkDirective:                              `(SecRule)`,
 	TkDirectiveSecrulescript:                 `(SecRuleScript)`,
-	TkFreeTextNewLine:                        `[^\"|\n]+`,
-	TkFreeTextQuote:                          `([^\']|([^\\]\\\'))+`,
 	TkQuoteButScaped:                         `(')`,
 	TkDoubleQuoteButScaped:                   `(")`,
 	TkCommaButScaped:                         `(,)`,
-	TkFreeTextQuoteMacroExpansion:            `(([^%'])|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\][']|[^\\]([\\][\\])+[\\]['])+`,
-	TkFreeTextDoubleQuoteMacroExpansion:      `((([^"%])|([%][^{]))|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\]["]|[^\\]([\\][\\])+[\\]["])+`,
-	TkFreeTextEqualsMacroExpansion:           `((([^",=%])|([%][^{]))|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\][=]|[^\\]([\\][\\])+[\\][=])+`,
-	TkFreeTextEqualsQuoteMacroExpansion:      `((([^'",=%])|([%][^{]))|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\][=]|[^\\][\\][']|[^\\]([\\][\\])+[\\][=])+`,
-	TkFreeTextCommaMacroExpansion:            `(([^%,])|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\][,]|[^\\]([\\][\\])+[\\][,])+`,
-	TkFreeTextCommaDoubleQuoteMacroExpansion: `((([^,"%])|([%][^{]))|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\]["]|[^\\]([\\][\\])+[\\]["])+`,
-	TkFreeTextSpaceMacroExpansion:            `(([^% ])|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\][ ]|[^\\]([\\][\\])+[\\][ ])+`,
 	TkStartMacroVariable:                     `(\%\{)`,
-	TkFreeTextQuoteComma:                     `[^,\']+`,
-	TkFreeTextSpace:                          `[^ \t]+`,
-	TkFreeTextSpaceComma:                     `[^, \t]+`,
-	TkFreeTextSpaceCommaQuote:                `[^, \t\"\n\r]+`,
-	TkFreeTextCommaQuote:                     `[^,\"\\n\\r]+`,
-	TkNewLineFreeText:                        `[^, \t\"\n\r]+`,
 	TkNot:                                    `!`,
-	TkFreeText:                               `([^\"]|([^\\]\\\"))+`,
 	TkRemoveRuleBy:                           `[0-9A-Za-z_\/\.\-\*\:\;\]\[\$]+`,
-	TkVarFreeTextQuote:                       `([^\']|([^\\]\\\'))+`,
-	TkVarFreeTextSpace:                       `[^ \t\"]+`,
-	TkVarFreeTextSpaceComma:                  `[^, \t\"]+`,
 	TkJson:                                   `(JSON)`,
 	TkNative:                                 `(NATIVE)`,
 	TkNewLine:                                `[\n\r]+`,
 	TkEquals:                                 `(=)`,
 	TkEqualsPlus:                             `(=\+)`,
 	TkEqualsMinus:                            `(=\-)`,
+	TkFreeText:                               freetextRegex,
+	TkCharacters:                             charactersRegex,
+	TkArgument:                               fmt.Sprintf(`("%s"|%s)`, freetextRegex, charactersRegex),
 }
 
 func TkRegex(i int) string {
@@ -762,119 +737,71 @@ func TkRegex(i int) string {
 
 func TokenMaker(i int) func(*Scanner, *machines.Match) (interface{}, error) {
 	return func(scan *Scanner, match *machines.Match) (interface{}, error) {
-		return scan.Token(i, match.Bytes, match), nil
+		return scan.Token(i, match, string(match.Bytes)), nil
 	}
 }
-func TokenMakerArgStripQuotes(i int) func(*Scanner, *machines.Match) (interface{}, error) {
-	return func(scan *Scanner, match *machines.Match) (interface{}, error) {
-		str := string(match.Bytes)
-		argIdx := strings.IndexFunc(str, unicode.IsSpace)
-		str = str[argIdx:]
-		str = strings.TrimSpace(str)
-		if strLen := len(str); str[0] == '"' && str[strLen-1] == '"' {
-			if strLen < 2 {
-				return nil, fmt.Errorf("unmached double quotes \"%s\", loc:%s", string(match.Bytes), match.String())
-			}
-			str = str[1 : strLen-1]
-		}
-		return scan.Token(i, []byte(str), match), nil
-	}
-}
-func Skip(scan *Scanner, match *machines.Match) (interface{}, error) {
+
+func skip(scan *Scanner, match *machines.Match) (interface{}, error) {
 	return nil, nil
 }
 
-// LI adds a case insensitive token to lexer
-// L: Prefix
-// I: Case insensitive
-func LI(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk)), TokenMaker(tk))
+func Skip(l *Lexer, state int, reg string) {
+	l.AddString(state, reg, skip)
 }
 
-// LIQFreeTextArg adds a case insensitive token to lexer, get an double quoted TextArg as tokens value
-// L: Prefix
-// I: Case insensitive
-// Q: Double Quoted Argment
-// TextArg: Argment is TextArg
-func LIQFreeTextArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkFreeText)+`["]`, TokenMakerArgStripQuotes(tk))
-}
-func LIFreeTextArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkFreeText), TokenMakerArgStripQuotes(tk))
+// not quoted
+func DirectiveToken(l *Lexer, token int, argState []int, args ...int) {
+	var argsString []string
+	for _, arg := range args {
+		argsString = append(argsString, TkRegex(arg))
+	}
+	Directive(l, token, TkRegex(token), argState, argsString...)
 }
 
-func LIQNumberArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkConfigValueNumber)+`["]`, TokenMakerArgStripQuotes(tk))
+// quoted
+func DirectiveTokenQuote(l *Lexer, token int, argState []int, args ...int) {
+	var argsString []string
+	for _, arg := range args {
+		argsString = append(argsString, quotedOrNot(TkRegex(arg)))
+	}
+	Directive(l, token, TkRegex(token), argState, argsString...)
 }
 
-func LINumberArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkConfigValueNumber), TokenMakerArgStripQuotes(tk))
-}
-func LIQPathArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkConfigValuePath)+`["]`, TokenMakerArgStripQuotes(tk))
-}
+func Directive(l *Lexer, tokenID int, token string, argState []int, args ...string) {
+	var items []string
+	sep := `[ \t]+`
+	tokenString := toCaseInsensitiveRegex(token)
+	items = append(items, tokenString)
+	for _, arg := range args {
+		items = append(items, arg)
+	}
+	reg := strings.Join(items, sep)
 
-func LIPathArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkConfigValuePath), TokenMakerArgStripQuotes(tk))
-}
-
-func LIFreeTextNewLineArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkFreeTextNewLine), TokenMakerArgStripQuotes(tk))
-}
-
-func LIQFreeTextNewLineArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkFreeTextNewLine)+`["]`, TokenMakerArgStripQuotes(tk))
-}
-func LINewLineFreeTextArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkNewLineFreeText), TokenMakerArgStripQuotes(tk))
-}
-func LIQNewLineFreeTextArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkNewLineFreeText)+`["]`, TokenMakerArgStripQuotes(tk))
-}
-
-func LIRegexArg(l *Lexer, state, regno, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(regno), TokenMakerArgStripQuotes(tk))
-}
-func LIQRegexArg(l *Lexer, state, regno, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(regno)+`["]`, TokenMakerArgStripQuotes(tk))
-}
-
-func LIFreeTextNewNumberLineArg(l *Lexer, state, tk int) {
-	l.AddString(state, toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkFreeTextNewLine)+`[ ]+`+TkRegex(TkConfigValueNumber), TokenMakerArgStripQuotes(tk))
-}
-
-func LISQFreeTextNewLineArg(l *Lexer, state, tk, newState ...int) {
-	l.AddString(
-		StateInit,
-		toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+["]`+TkRegex(TkFreeTextNewLine)+`["]`,
-		func(scan *Scanner, match *machines.Match) (interface{}, error) {
-			f := TokenMakerArgStripQuotes(tk)
-			scan.ToState(newState...)
-			return f(scan, match)
-		})
-}
-
-func LISFreeTextSpaceCommaQuoteArg(l *Lexer, state, tk, newState ...int) {
-	l.AddString(
-		StateInit,
-		toCaseInsensitiveRegex(TkRegex(tk))+`[ \t]+`+TkRegex(TkFreeTextSpaceCommaQuote),
-		func(scan *Scanner, match *machines.Match) (interface{}, error) {
-			f := TokenMakerArgStripQuotes(tk)
-			scan.ToState(newState...)
-			return f(scan, match)
-		})
-}
-func LIS(l *Lexer, state, tk, newState ...int) {
-	l.AddString(
-		StateInit,
-		toCaseInsensitiveRegex(TkRegex(tk)),
-		func(scan *Scanner, match *machines.Match) (interface{}, error) {
-			f := TokenMaker(tk)
-			scan.ToState(newState...)
-			return f(scan, match)
-		})
-}
-
-func LSkip(l *Lexer, state int, reg string) {
-	l.AddString(state, reg, Skip)
+	for idx, item := range items {
+		if idx == 0 {
+			items[idx] = namedRegex("directive", item)
+		} else {
+			items[idx] = namedRegex("arg", item)
+		}
+	}
+	reS := fmt.Sprintf("^%s$", strings.Join(items, sep))
+	re := regexp.MustCompile(reS)
+	names := re.SubexpNames()
+	f := func(scan *Scanner, match *machines.Match) (interface{}, error) {
+		var matchArgs []interface{}
+		sub := re.FindSubmatch(match.Bytes)
+		if len(sub) == 0 {
+			return nil, fmt.Errorf("item %q not match directive %s", match.Bytes, token)
+		}
+		for idx, name := range names {
+			if name == "arg" {
+				matchArgs = append(matchArgs, removeQuotes(string(sub[idx])))
+			}
+		}
+		for i := len(argState) - 1; i >= 0; i-- {
+			scan.ToState(argState[i])
+		}
+		return scan.Token(tokenID, match, matchArgs...), nil
+	}
+	l.AddString(StateInit, reg, f)
 }

@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"strings"
-	"unicode"
 
 	dfapkg "github.com/timtadh/lexmachine/dfa"
 	"github.com/timtadh/lexmachine/frontend"
@@ -100,9 +98,9 @@ func (l *Lexer) Scanner(text []byte) (*Scanner, error) {
 func (s *Scanner) Next() (tok interface{}, err error, eos bool) {
 	var token interface{}
 	text := s.Text
-	dfa, has := s.lexer.dfas[s.state]
+	dfa, has := s.lexer.dfas[s.State()]
 	if !has || dfa == nil {
-		return nil, fmt.Errorf("state[dfa]: %d not found", s.state), false
+		return nil, fmt.Errorf("state[dfa]: %d not found", s.State()), false
 	}
 
 	patterns, has := s.lexer.states[s.State()]
@@ -112,8 +110,7 @@ func (s *Scanner) Next() (tok interface{}, err error, eos bool) {
 
 	scan := machines.DFALexerEngine(
 		dfa.Start,
-		dfa.Error,
-		dfa.Trans,
+		dfa.Error, dfa.Trans,
 		dfa.Accepting,
 		text,
 	)
@@ -184,27 +181,10 @@ func assembleAST(patterns []*pattern) (frontend.AST, error) {
 	return lexast, nil
 }
 
-func toCaseInsensitiveRegex(s string) string {
-	var b strings.Builder
-	for _, l := range s {
-		lower := unicode.ToLower(l)
-		upper := unicode.ToUpper(l)
-		if lower == upper {
-			b.WriteRune(l)
-		} else {
-			b.WriteString("[")
-			b.WriteRune(lower)
-			b.WriteRune(upper)
-			b.WriteString("]")
-		}
-	}
-	return b.String()
-}
-
-func (s *Scanner) Token(typ int, value interface{}, m *machines.Match) *Token {
+func (s *Scanner) Token(typ int, m *machines.Match, values ...interface{}) *Token {
 	return &Token{
 		Type:        typ,
-		Value:       value,
+		Value:       values,
 		Lexeme:      m.Bytes,
 		TC:          m.TC,
 		StartLine:   m.StartLine,
@@ -216,7 +196,7 @@ func (s *Scanner) Token(typ int, value interface{}, m *machines.Match) *Token {
 
 type Token struct {
 	Type        int
-	Value       interface{}
+	Value       []interface{}
 	Lexeme      []byte
 	TC          int
 	StartLine   int
