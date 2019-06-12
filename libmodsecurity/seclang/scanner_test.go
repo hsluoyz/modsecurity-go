@@ -1,69 +1,48 @@
 package seclang
 
 import (
-	"fmt"
+	"strings"
 	"testing"
-
-	"github.com/timtadh/lexmachine/machines"
 )
 
-func TestSimpleSecRule(t *testing.T) {
-	const (
-		TkSecRule = 1 + iota
-		TkFullRequest
-	)
-	const (
-		StateSecRule = 1 + iota
-	)
-	lex := NewLexer()
-	lex.AddString(StateInit, "SecRule", func(scan *Scanner, match *machines.Match) (interface{}, error) {
-		scan.ToState(StateSecRule)
-		return scan.Token(TkSecRule, match, "SecRule"), nil
-	})
-	lex.Add(StateInit, []byte("( |\t|\n|\r)+"), func(scan *Scanner, match *machines.Match) (interface{}, error) {
-		return nil, nil
-	})
-	lex.AddString(StateSecRule, "FULL_REQUEST", func(scan *Scanner, match *machines.Match) (interface{}, error) {
-		return scan.Token(TkFullRequest, match, "FULL_REQUEST"), nil
-	})
-	lex.Add(StateSecRule, []byte("( |\t|\n|\r)+"), func(scan *Scanner, match *machines.Match) (interface{}, error) {
-		return nil, nil
-	})
-	expected := []string{
-		"SecRule",
-		"FULL_REQUEST",
-	}
-	scan, err := lex.Scanner([]byte("SecRule FULL_REQUEST"))
-	if err != nil {
-		t.Error(err)
-	}
-	for _, e := range expected {
-		tok, err, eos := scan.Next()
-		if err != nil {
-			t.Errorf("unexpected error:%s", err.Error())
-		}
-		token := tok.(*Token)
-		if eos {
-			t.Errorf("unexpected eos, token :%s", token.String())
-		}
-		if token.Value[0].(string) != e {
-			t.Errorf("Want %s, get :%s", e, token.Value)
-		}
-		fmt.Println(token.String())
-	}
+type expect struct {
+	tk  int
+	str []string
 }
 
-func TestCaseInsensitive(t *testing.T) {
-	excepted := map[string]string{
-		"ab":    "[aA][bB]",
-		"Ab":    "[aA][bB]",
-		"AB":    "[aA][bB]",
-		"你好":    "你好",
-		"ab|cd": "[aA][bB]|[cC][dD]",
-	}
-	for in, out := range excepted {
-		if res := toCaseInsensitiveRegex(in); res != out {
-			t.Errorf("excepted: %s got %s", out, res)
+func TestSecLangDirectives(t *testing.T) {
+	one := func(rule string) Directive {
+		scan := NewSecLangScanner(strings.NewReader(rule))
+		dir, err := scan.ScanDirective()
+		if err != nil {
+			t.Error(err)
+			return nil
 		}
+		return dir
 	}
+	t.Run("Directive SecRuleEngine", func(t *testing.T) {
+		expectKind := TkDirRuleEng
+		rules := map[string]int{
+			`SecRuleEngine On`:            TriBoolTrue,
+			`SecRuleEngine on`:            TriBoolTrue,
+			`SecRuleEngine Off`:           TriBoolFalse,
+			`secruleengine OFF`:           TriBoolFalse,
+			`SecRuleEngine DetectionOnly`: TriBoolDetc,
+			`SECRULEENGINE detectiononly`: TriBoolDetc,
+		}
+		for rule, expectValue := range rules {
+			dir := one(rule)
+			if d, ok := dir.(*TriBoolArgDirective); ok {
+				if d.Type() != expectKind {
+					t.Errorf("rule: %s expect kind %d, bug got %#v", rule, expectKind, dir)
+				}
+				if d.Value != expectValue {
+					t.Errorf("rule: %s expect value %#v, bug got %#v", rule, expectValue, dir)
+				}
+			} else {
+				t.Errorf("rule: %s expect BoolArgDirective, bug got %#v", rule, dir)
+				return
+			}
+		}
+	})
 }
