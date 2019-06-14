@@ -17,7 +17,53 @@ const (
 	TkValueDetc
 	TkValueOff
 	TkValueOn
+	// variables
+	TkVarArgs
+	TkVarArgsNames
+	TkVarQueryString
+	TkVarRemoteAddr
+	TkVarRequestBasename
+	TkVarRequestBody
+	TkVarRequestCookies
+	TkVarRequestCookiesNames
+	TkVarRequestFilename
+	TkVarRequestHeaders
+	TkVarRequestHeadersNames
+	TkVarRequestMethod
+	TkVarRequestProtocol
+	TkVarRequestUri
+	TkVarResponseBody
+	TkVarResponseContentLength
+	TkVarResponseContentType
+	TkVarResponseHeaders
+	TkVarResponseHeadersNames
+	TkVarResponseProtocol
+	TkVarResponseStatus
 )
+
+var variableMap = map[string]int{
+	"ARGS":                    TkVarArgs,
+	"ARGS_NAMES":              TkVarArgsNames,
+	"QUERY_STRING":            TkVarQueryString,
+	"REMOTE_ADDR":             TkVarRemoteAddr,
+	"REQUEST_BASENAME":        TkVarRequestBasename,
+	"REQUEST_BODY":            TkVarRequestBody,
+	"REQUEST_COOKIES":         TkVarRequestCookies,
+	"REQUEST_COOKIES_NAMES":   TkVarRequestCookiesNames,
+	"REQUEST_FILENAME":        TkVarRequestFilename,
+	"REQUEST_HEADERS":         TkVarRequestHeaders,
+	"REQUEST_HEADERS_NAMES":   TkVarRequestHeadersNames,
+	"REQUEST_METHOD":          TkVarRequestMethod,
+	"REQUEST_PROTOCOL":        TkVarRequestProtocol,
+	"REQUEST_URI":             TkVarRequestUri,
+	"RESPONSE_BODY":           TkVarResponseBody,
+	"RESPONSE_CONTENT_LENGTH": TkVarResponseContentLength,
+	"RESPONSE_CONTENT_TYPE":   TkVarResponseContentType,
+	"RESPONSE_HEADERS":        TkVarResponseHeaders,
+	"RESPONSE_HEADERS_NAMES":  TkVarResponseHeadersNames,
+	"RESPONSE_PROTOCOL":       TkVarResponseProtocol,
+	"RESPONSE_STATUS":         TkVarResponseStatus,
+}
 
 type DirectiveFactory func(*Scanner) (Directive, error)
 

@@ -93,9 +93,51 @@ func (s *Scanner) ReadWord() string {
 	}
 }
 
+func (s *Scanner) ReadVariables() ([]*Variable, error) {
+	res := make([]*Variable, 0, 1)
+	argString, err := s.ReadString()
+	if err != nil {
+		return nil, err
+	}
+	if len(argString) == 0 {
+		return nil, nil
+	}
+
+	args := splitMulti(argString, ",|")
+	for _, a := range args {
+		if len(a) < 1 {
+			return nil, errors.New("unexpected ',' or '|' in argument")
+		}
+		arg := &Variable{}
+		if a[0] == '!' {
+			arg.Exclusion = true
+			a = a[1:]
+		} else if a[0] == '&' {
+			arg.Count = true
+			a = a[1:]
+		}
+		i := strings.IndexAny(a, ".:")
+		if i > 0 {
+			arg.Index = a[i+1:]
+			a = a[:i]
+		}
+		tk, has := variableMap[a]
+		if !has {
+			return nil, fmt.Errorf("unknown variable %s\n", a)
+		}
+		arg.Kind = tk
+		res = append(res, arg)
+	}
+
+	return res, nil
+}
+
 func (s *Scanner) ReadString() (string, error) {
 	for isBlank(s.current) {
 		s.advance()
+	}
+	if isNewLine(s.current) {
+		return "", nil
 	}
 	if s.current == '"' {
 		return s.readString('"')
@@ -104,7 +146,7 @@ func (s *Scanner) ReadString() (string, error) {
 }
 
 func (s *Scanner) readString(delimiter ...rune) (string, error) {
-	if runeInSlice(s.current, delimiter) {
+	if runeInSlice(s.current, delimiter) || s.current == BOS {
 		s.advance()
 	} else {
 		s.saveAndAdvance()

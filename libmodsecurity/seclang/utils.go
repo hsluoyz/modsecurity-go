@@ -1,5 +1,9 @@
 package seclang
 
+import (
+	"strings"
+)
+
 func isBlank(c rune) bool    { return runeInSlice(c, []rune{' ', '\f', '\t', '\v'}) }
 func isNewLine(c rune) bool  { return c == '\n' || c == '\r' }
 func isDecimal(c rune) bool  { return '0' <= c && c <= '9' }
@@ -20,4 +24,28 @@ func runeInSlice(c rune, sli []rune) bool {
 		}
 	}
 	return false
+}
+
+func splitMulti(s string, seps string) []string {
+	var count = 1
+	if len(seps) == 0 {
+		return []string{s}
+	}
+	for _, sep := range seps {
+		count += strings.Count(s, string(sep))
+	}
+	res := make([]string, count)
+	i := 0
+	for {
+		m := strings.IndexAny(s, seps)
+		if m < 0 {
+			break
+		}
+		res[i] = s[:m]
+		s = s[m+1:]
+		i++
+	}
+	res[i] = s
+	return res[:i+1]
+
 }

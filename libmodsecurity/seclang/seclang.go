@@ -5,7 +5,7 @@ func init() {
 }
 
 func initDirectives() {
-	// registerDir(TkDirRule, `SecRule`, StringDirectiveFactory(TkDirRule))
+	registerDir(TkDirRule, `SecRule`, RuleDirectiveScaner)
 	registerDir(TkDirRuleEng, `SecRuleEngine`, TriBoolArgDirectiveFactory(TkDirRuleEng))
 	registerDir(TkDirReqBody, `SecRequestBodyAccess`, BoolArgDirectiveFactory(TkDirReqBody))
 	registerDir(TkDirResBody, `SecResponseBodyAccess`, BoolArgDirectiveFactory(TkDirResBody))
@@ -86,4 +86,34 @@ func TriBoolArgDirectiveFactory(tk int) DirectiveFactory {
 			Value: val[tkVal],
 		}, nil
 	}
+}
+
+type Variable struct {
+	Kind      int
+	Index     string
+	Count     bool
+	Exclusion bool
+}
+
+type RuleDirective struct {
+	Variable []*Variable
+}
+
+func (d *RuleDirective) Type() int {
+	return TkDirRule
+}
+
+func RuleDirectiveScaner(s *Scanner) (Directive, error) {
+	rule := &RuleDirective{}
+	vars, err := s.ReadVariables()
+	if err != nil {
+		return nil, err
+	}
+	rule.Variable = vars
+	actions, err := s.ReadString()
+	if err != nil {
+		return nil, err
+	}
+	_ = actions
+	return rule, nil
 }
