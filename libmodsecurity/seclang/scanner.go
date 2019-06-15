@@ -2,6 +2,7 @@
 package seclang
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -26,26 +27,17 @@ type Directive interface {
 	Token() int
 }
 
-type State struct {
-	// Code: State code.
-	Code int
-	// ExitRunes: Exit current state when rune appear.
-	ExitRunes []rune
-	// Count: Number of token in current state.
-	Count int
-}
-
 type Scanner struct {
 	buffer               *bytes.Buffer
-	r                    io.ByteReader
+	r                    *bufio.Reader
 	current              rune
 	LineNumber, LastLine int
 }
 
-func NewSecLangScanner(r io.ByteReader) *Scanner {
+func NewSecLangScanner(r io.Reader) *Scanner {
 	return &Scanner{
 		buffer:     bytes.NewBuffer(nil),
-		r:          r,
+		r:          bufio.NewReader(r),
 		LastLine:   1,
 		LineNumber: 1,
 		current:    BOS,
@@ -185,35 +177,42 @@ func (s *Scanner) ReadActions() (*Actions, error) {
 		case 0:
 			return nil, err
 		case TkActionId:
+			arg = trimQuote(arg)
 			res.Id, err = strconv.Atoi(arg)
 			if err != nil {
 				return nil, fmt.Errorf("cannot parse id %s, err: %s", arg, err.Error())
 			}
 		case TkActionTag:
+			arg = trimQuote(arg)
 			if len(arg) == 0 {
 				return nil, fmt.Errorf("get empty tag value")
 			}
 			res.Tags = append(res.Tags, arg)
 		case TkActionMsg:
+			arg = trimQuote(arg)
 			if len(arg) == 0 {
 				return nil, fmt.Errorf("get empty msg value")
 			}
 			res.Msg = append(res.Msg, arg)
 		case TkActionRev:
+			arg = trimQuote(arg)
 			res.Rev = arg
 		case TkActionSeverity:
+			arg = trimQuote(arg)
 			if severity, has := severityMap[arg]; has {
 				res.Severity = severity
 			} else {
 				return nil, fmt.Errorf("unknown severity %s", arg)
 			}
 		case TkActionT:
+			arg = trimQuote(arg)
 			if tt, has := transformationMap[arg]; has {
 				res.Trans = append(res.Trans, &Trans{tt})
 			} else {
 				return nil, fmt.Errorf("unknown trans formation %s", arg)
 			}
 		case TkActionPhase:
+			arg = trimQuote(arg)
 			p, has := phaseAlias[arg]
 			if has {
 				res.Phase = p
@@ -249,19 +248,37 @@ func parseAction(act string) (int, string, error) {
 }
 
 func (s *Scanner) ReadString() (string, error) {
-	if s.current == BOS {
-		s.advance()
-	}
-	for isBlank(s.current) {
-		s.advance()
-	}
+	s.SkipBlank()
 	if isNewLine(s.current) {
 		return "", nil
 	}
 	if s.current == '"' {
 		return s.readString('"')
 	}
+	if s.current == '\'' {
+		return s.readString('\'')
+	}
 	return s.readString(' ', '\f', '\t', '\v', '\n', '\r', EOS)
+}
+
+func (s *Scanner) SkipBlank() error {
+	for {
+		switch {
+		case s.current == BOS:
+			s.advance()
+		case isBlank(s.current):
+			s.advance()
+		case s.current == '\\':
+			if s.next() == '\n' {
+				s.advance() //skip '\\'
+				s.advance() //skip '\n'
+
+			}
+		default:
+			return nil
+
+		}
+	}
 }
 
 func (s *Scanner) readString(delimiter ...rune) (string, error) {
@@ -344,6 +361,15 @@ func (s *Scanner) advance() {
 		s.current = EOS
 	} else {
 		s.current = rune(c)
+	}
+}
+
+func (s *Scanner) next() rune {
+	if c, err := s.r.ReadByte(); err != nil {
+		return EOS
+	} else {
+		s.r.UnreadByte()
+		return rune(c)
 	}
 }
 
@@ -471,6 +497,8 @@ type Actions struct {
 
 type RuleDirective struct {
 	Variable []*Variable
+	Operator *Operator
+	Actions  *Actions
 }
 
 func (d *RuleDirective) Token() int {
@@ -484,10 +512,15 @@ func RuleDirectiveScaner(s *Scanner) (Directive, error) {
 		return nil, err
 	}
 	rule.Variable = vars
-	actions, err := s.ReadString()
+	op, err := s.ReadOperator()
 	if err != nil {
 		return nil, err
 	}
-	_ = actions
+	rule.Operator = op
+	actions, err := s.ReadActions()
+	if err != nil {
+		return nil, err
+	}
+	rule.Actions = actions
 	return rule, nil
 }

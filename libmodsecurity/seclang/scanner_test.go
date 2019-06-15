@@ -1,9 +1,12 @@
 package seclang
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 type expect struct {
@@ -11,7 +14,7 @@ type expect struct {
 	str []string
 }
 
-func TestSecLangDirectives(t *testing.T) {
+func TestSecLangSimpleDirectives(t *testing.T) {
 	one := func(rule string) Directive {
 		scan := NewSecLangScanner(strings.NewReader(rule))
 		dir, err := scan.ReadDirective()
@@ -152,6 +155,128 @@ func TestSecLangActions(t *testing.T) {
 			}
 			if !reflect.DeepEqual(res, expect) {
 				t.Errorf("actions: %s expect %#v, but got %#v", rule, expect, res)
+			}
+		}
+	})
+}
+
+func TestSecLangSecRule(t *testing.T) {
+	one := func(rule string) *RuleDirective {
+		scan := NewSecLangScanner(strings.NewReader(rule))
+		o, err := scan.ReadDirective()
+		if err != nil {
+			t.Error(err)
+			return nil
+		}
+		r, ok := o.(*RuleDirective)
+		if !ok {
+			t.Error(fmt.Errorf("expect RuleDirective get %#v", o))
+			return nil
+		}
+		return r
+	}
+	t.Run("Actions", func(t *testing.T) {
+		rules := map[string]*RuleDirective{
+			`SecRule ARGS "abc" "id:123,phase:1,deny"`: &RuleDirective{
+				Variable: []*Variable{
+					&Variable{
+						Tk: TkVarArgs,
+					},
+				},
+				Operator: &Operator{
+					Tk:       TkOpRx,
+					Argument: "abc",
+				},
+				Actions: &Actions{
+					Id:    123,
+					Phase: 1,
+					Action: []*Action{
+						&Action{
+							Tk: TkActionDeny,
+						},
+					},
+				},
+			},
+			` 
+SecRule ARGS|ARGS_NAMES|REQUEST_COOKIES|!REQUEST_COOKIES:/__utm/|REQUEST_COOKIES_NAMES|REQUEST_BODY|REQUEST_HEADERS|XML:/*|XML://@* \
+    "@rx java\.lang\.(?:runtime|processbuilder)" \
+    "id:944100,\
+    phase:2,\
+    block,\
+    log,\
+    msg:'Remote Command Execution: Suspicious Java class detected',\
+    logdata:'Matched Data: %{MATCHED_VAR} found within %{MATCHED_VAR_NAME}',\
+    t:none,t:lowercase,\
+    tag:'application-multi',\
+    tag:'language-java',\
+    tag:'platform-multi',\
+    tag:'attack-rce',\
+    tag:'OWASP_CRS/WEB_ATTACK/COMMAND_INJECTION',\
+    tag:'WASCTC/WASC-31',\
+    tag:'OWASP_TOP_10/A1',\
+    tag:'PCI/6.5.2',\
+    tag:'paranoia-level/1',\
+    ver:'OWASP_CRS/3.1.0',\
+    severity:'CRITICAL',\
+    setvar:'tx.rce_score=+%{tx.critical_anomaly_score}',\
+    setvar:'tx.anomaly_score_pl1=+%{tx.critical_anomaly_score}'"
+`: &RuleDirective{
+				Variable: []*Variable{
+					&Variable{Tk: TkVarArgs},
+					&Variable{Tk: TkVarArgsNames},
+					&Variable{Tk: TkVarRequestCookies},
+					&Variable{Tk: TkVarRequestCookies, Index: "/__utm/", Exclusion: true},
+					&Variable{Tk: TkVarRequestCookiesNames},
+					&Variable{Tk: TkVarRequestBody},
+					&Variable{Tk: TkVarRequestHeaders},
+					&Variable{Tk: TkVarXML, Index: "/*"},
+					&Variable{Tk: TkVarXML, Index: "//@*"},
+				},
+				Operator: &Operator{
+					Tk:       TkOpRx,
+					Argument: "java.lang.(?:runtime|processbuilder)",
+				},
+				Actions: &Actions{
+					Id:    944100,
+					Phase: 2,
+					Msg: []string{
+						"Remote Command Execution: Suspicious Java class detected",
+					},
+					Tags: []string{
+						"application-multi",
+						"language-java",
+						"platform-multi",
+						"attack-rce",
+						"OWASP_CRS/WEB_ATTACK/COMMAND_INJECTION",
+						"WASCTC/WASC-31",
+						"OWASP_TOP_10/A1",
+						"PCI/6.5.2",
+						"paranoia-level/1",
+					},
+					Severity: 2,
+					Trans: []*Trans{
+						&Trans{Tk: TkTransNone},
+						&Trans{Tk: TkTransLowercase},
+					},
+					Action: []*Action{
+						&Action{Tk: TkActionBlock, Argument: ""},
+						&Action{Tk: TkActionLog, Argument: ""},
+						&Action{Tk: TkActionLogData, Argument: "'Matched Data: %{MATCHED_VAR} found within %{MATCHED_VAR_NAME}'"},
+						&Action{Tk: TkActionVer, Argument: "'OWASP_CRS/3.1.0'"},
+						&Action{Tk: TkActionSetVar, Argument: "'tx.rce_score=+%{tx.critical_anomaly_score}'"},
+						&Action{Tk: TkActionSetVar, Argument: "'tx.anomaly_score_pl1=+%{tx.critical_anomaly_score}'"},
+					},
+				},
+			},
+		}
+		for rule, expect := range rules {
+			res := one(rule)
+			if res == nil {
+				return
+			}
+			if !reflect.DeepEqual(res, expect) {
+				t.Errorf("rule: %s expect %#+v, but got %#+v\n", rule, expect, res)
+				spew.Dump(expect, res)
 			}
 		}
 	})

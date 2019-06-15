@@ -39,6 +39,7 @@ const (
 	TkVarResponseHeadersNames
 	TkVarResponseProtocol
 	TkVarResponseStatus
+	TkVarXML
 	// operator
 	TkOpRx
 	TkOpEq
@@ -55,13 +56,16 @@ const (
 	TkActionSeverity
 	TkActionLog
 	TkActionDeny
-	TkActionbLock
+	TkActionBlock
 	TkActionStatus
 	TkActionpHase
 	TkActionT
 	TkActionSkip
 	TkActionChain
 	TkActionPhase
+	TkActionVer
+	TkActionLogData
+	TkActionSetVar
 	// transform action
 	TkTransLowercase
 	TkTransUrlDecode
@@ -83,19 +87,23 @@ var operatorMap = map[string]int{
 
 var actionMap = map[string]int{
 	"allow":    TkActionAllow,
-	"sg":       TkActionMsg,
+	"msg":      TkActionMsg,
 	"id":       TkActionId,
-	"ev":       TkActionRev,
+	"tag":      TkActionTag,
+	"rev":      TkActionRev,
+	"ver":      TkActionVer,
 	"severity": TkActionSeverity,
-	"og":       TkActionLog,
+	"log":      TkActionLog,
 	"deny":     TkActionDeny,
-	"lock":     TkActionbLock,
-	"statu":    TkActionStatus,
+	"block":    TkActionBlock,
+	"status":   TkActionStatus,
 	"hase":     TkActionpHase,
 	"t":        TkActionT,
-	"kip":      TkActionSkip,
+	"skip":     TkActionSkip,
 	"chain":    TkActionChain,
 	"phase":    TkActionPhase,
+	"logdata":  TkActionLogData,
+	"setvar":   TkActionSetVar,
 }
 var transformationMap = map[string]int{
 	"lowercase":          TkTransLowercase,
@@ -129,6 +137,7 @@ var variableMap = map[string]int{
 	"RESPONSE_HEADERS_NAMES":  TkVarResponseHeadersNames,
 	"RESPONSE_PROTOCOL":       TkVarResponseProtocol,
 	"RESPONSE_STATUS":         TkVarResponseStatus,
+	"XML":                     TkVarXML,
 }
 
 var severityMap = map[string]int{
