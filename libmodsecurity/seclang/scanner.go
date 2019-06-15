@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -51,7 +52,7 @@ func NewSecLangScanner(r io.ByteReader) *Scanner {
 	}
 }
 
-func (s *Scanner) ScanDirective() (Directive, error) {
+func (s *Scanner) ReadDirective() (Directive, error) {
 	if s.current == BOS {
 		s.advance()
 	}
@@ -165,6 +166,86 @@ func (s *Scanner) ReadOperator() (*Operator, error) {
 	}
 	res.Tk = tk
 	return res, nil
+}
+
+func (s *Scanner) ReadActions() (*Actions, error) {
+	res := new(Actions)
+	str, err := s.ReadString()
+	if err != nil {
+		return nil, err
+	}
+	str = strings.TrimSpace(str)
+	// str = strings.Trim(str, "\r\n\t\f\v ")
+	if len(str) == 0 {
+		return nil, nil
+	}
+	acts := strings.Split(str, ",")
+	for _, act := range acts {
+		switch tk, arg, err := parseAction(act); tk {
+		case 0:
+			return nil, err
+		case TkActionId:
+			res.Id, err = strconv.Atoi(arg)
+			if err != nil {
+				return nil, fmt.Errorf("cannot parse id %s, err: %s", arg, err.Error())
+			}
+		case TkActionTag:
+			if len(arg) == 0 {
+				return nil, fmt.Errorf("get empty tag value")
+			}
+			res.Tags = append(res.Tags, arg)
+		case TkActionMsg:
+			if len(arg) == 0 {
+				return nil, fmt.Errorf("get empty msg value")
+			}
+			res.Msg = append(res.Msg, arg)
+		case TkActionRev:
+			res.Rev = arg
+		case TkActionSeverity:
+			if severity, has := severityMap[arg]; has {
+				res.Severity = severity
+			} else {
+				return nil, fmt.Errorf("unknown severity %s", arg)
+			}
+		case TkActionT:
+			if tt, has := transformationMap[arg]; has {
+				res.Trans = append(res.Trans, &Trans{tt})
+			} else {
+				return nil, fmt.Errorf("unknown trans formation %s", arg)
+			}
+		case TkActionPhase:
+			p, has := phaseAlias[arg]
+			if has {
+				res.Phase = p
+				continue
+			}
+			p, err = strconv.Atoi(arg)
+			if err != nil {
+				return nil, fmt.Errorf("cannot parse phase %s, err: %s", arg, err.Error())
+			}
+			if p < PhaseRequestHeaders || p > PhaseLogging {
+				return nil, fmt.Errorf("unsupported phase %d", p)
+			}
+			res.Phase = p
+		default:
+			res.Action = append(res.Action, &Action{tk, arg})
+		}
+	}
+	return res, nil
+}
+
+func parseAction(act string) (int, string, error) {
+	var arg string
+	s := strings.SplitN(act, ":", 2)
+	action := strings.TrimSpace(s[0])
+	tk, has := actionMap[action]
+	if !has {
+		return 0, "", fmt.Errorf("unknown action %s", s[0])
+	}
+	if len(s) > 1 {
+		arg = s[1]
+	}
+	return tk, arg, nil
 }
 
 func (s *Scanner) ReadString() (string, error) {
@@ -367,6 +448,25 @@ type Operator struct {
 	Tk       int
 	Not      bool
 	Argument string
+}
+
+type Action struct {
+	Tk       int
+	Argument string
+}
+type Trans struct {
+	Tk int
+}
+
+type Actions struct {
+	Id       int
+	Phase    int
+	Tags     []string
+	Msg      []string
+	Rev      string
+	Severity int
+	Trans    []*Trans
+	Action   []*Action
 }
 
 type RuleDirective struct {

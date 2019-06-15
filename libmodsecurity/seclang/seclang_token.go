@@ -46,6 +46,30 @@ const (
 	TkOpGt
 	TkOpLe
 	TkOpLt
+	// actions
+	TkActionAllow
+	TkActionMsg
+	TkActionId
+	TkActionTag
+	TkActionRev
+	TkActionSeverity
+	TkActionLog
+	TkActionDeny
+	TkActionbLock
+	TkActionStatus
+	TkActionpHase
+	TkActionT
+	TkActionSkip
+	TkActionChain
+	TkActionPhase
+	// transform action
+	TkTransLowercase
+	TkTransUrlDecode
+	TkTransNone
+	TkTransCompressWhitespace
+	TkTransRemoveWhitespace
+	TkTransReplaceNulls
+	TkTransRemoveNulls
 )
 
 var operatorMap = map[string]int{
@@ -55,6 +79,32 @@ var operatorMap = map[string]int{
 	"gt": TkOpGt,
 	"le": TkOpLe,
 	"lt": TkOpLt,
+}
+
+var actionMap = map[string]int{
+	"allow":    TkActionAllow,
+	"sg":       TkActionMsg,
+	"id":       TkActionId,
+	"ev":       TkActionRev,
+	"severity": TkActionSeverity,
+	"og":       TkActionLog,
+	"deny":     TkActionDeny,
+	"lock":     TkActionbLock,
+	"statu":    TkActionStatus,
+	"hase":     TkActionpHase,
+	"t":        TkActionT,
+	"kip":      TkActionSkip,
+	"chain":    TkActionChain,
+	"phase":    TkActionPhase,
+}
+var transformationMap = map[string]int{
+	"lowercase":          TkTransLowercase,
+	"urlDecode":          TkTransUrlDecode,
+	"none":               TkTransNone,
+	"compressWhitespace": TkTransCompressWhitespace,
+	"removeWhitespace":   TkTransRemoveWhitespace,
+	"replaceNulls":       TkTransReplaceNulls,
+	"removeNulls":        TkTransRemoveNulls,
 }
 
 var variableMap = map[string]int{
@@ -79,6 +129,31 @@ var variableMap = map[string]int{
 	"RESPONSE_HEADERS_NAMES":  TkVarResponseHeadersNames,
 	"RESPONSE_PROTOCOL":       TkVarResponseProtocol,
 	"RESPONSE_STATUS":         TkVarResponseStatus,
+}
+
+var severityMap = map[string]int{
+	"EMERGENCY": 0,
+	"ALERT":     1,
+	"CRITICAL":  2,
+	"ERROR":     3,
+	"WARNING":   4,
+	"NOTICE":    5,
+	"INFO":      6,
+	"DEBUG":     7,
+}
+
+const (
+	PhaseRequestHeaders  = 1
+	PhaseRequestBody     = 2
+	PhaseResponseHeaders = 3
+	PhaseResponseBody    = 4
+	PhaseLogging         = 5
+)
+
+var phaseAlias = map[string]int{
+	"request":  PhaseRequestBody,
+	"response": PhaseResponseBody,
+	"logging":  PhaseLogging,
 }
 
 type DirectiveFactory func(*Scanner) (Directive, error)
