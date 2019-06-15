@@ -22,7 +22,7 @@ var escapes map[rune]rune = map[rune]rune{
 }
 
 type Directive interface {
-	Type() int
+	Token() int
 }
 
 type State struct {
@@ -125,14 +125,52 @@ func (s *Scanner) ReadVariables() ([]*Variable, error) {
 		if !has {
 			return nil, fmt.Errorf("unknown variable %s\n", a)
 		}
-		arg.Kind = tk
+		arg.Tk = tk
 		res = append(res, arg)
 	}
 
 	return res, nil
 }
 
+func (s *Scanner) ReadOperator() (*Operator, error) {
+	res := new(Operator)
+	opString, err := s.ReadString()
+	if err != nil {
+		return nil, err
+	}
+	if len(opString) == 0 {
+		return nil, nil
+	}
+	if len(opString) > 0 && opString[0] == '!' {
+		res.Not = true
+		opString = opString[1:]
+	}
+	if len(opString) == 0 {
+		return nil, fmt.Errorf("expecting operator bug get %s", opString)
+	}
+	if opString[0] != '@' {
+		res.Tk = TkOpRx
+		res.Argument = opString
+		return res, nil
+	}
+	opWithArg := strings.SplitN(opString, " ", 2)
+	op := opWithArg[0]
+	if len(opWithArg) > 1 {
+		res.Argument = opWithArg[1]
+	}
+	op = op[1:] // skip @
+	tk, has := operatorMap[op]
+	if !has {
+		return nil, fmt.Errorf("expect operator got @%s", op)
+	}
+	res.Tk = tk
+	return res, nil
+}
+
 func (s *Scanner) ReadString() (string, error) {
+	if s.current == BOS {
+		s.advance()
+	}
 	for isBlank(s.current) {
 		s.advance()
 	}
@@ -146,7 +184,7 @@ func (s *Scanner) ReadString() (string, error) {
 }
 
 func (s *Scanner) readString(delimiter ...rune) (string, error) {
-	if runeInSlice(s.current, delimiter) || s.current == BOS {
+	if runeInSlice(s.current, delimiter) {
 		s.advance()
 	} else {
 		s.saveAndAdvance()
@@ -239,4 +277,117 @@ func (s *Scanner) advanceAndSave(c rune) {
 }
 func (s *Scanner) save(c rune) {
 	s.buffer.WriteByte(byte(c))
+}
+
+type StringArgDirective struct {
+	Tk    int
+	Value string
+}
+
+func (d *StringArgDirective) Token() int {
+	return d.Tk
+}
+
+func StringArgDirectiveFactory(tk int) DirectiveFactory {
+	return func(s *Scanner) (Directive, error) {
+		str, err := s.ReadString()
+		if err != nil {
+			return nil, err
+		}
+		return &StringArgDirective{
+			Tk:    tk,
+			Value: str,
+		}, nil
+	}
+}
+
+type BoolArgDirective struct {
+	Tk    int
+	Value bool
+}
+
+func (d *BoolArgDirective) Token() int {
+	return d.Tk
+}
+
+func BoolArgDirectiveFactory(tk int) DirectiveFactory {
+	return func(s *Scanner) (Directive, error) {
+		tkVal, _, err := s.ReadValue(TkValueOn, TkValueOff)
+		if err != nil {
+			return nil, err
+		}
+		return &BoolArgDirective{
+			Tk:    tk,
+			Value: tkVal == TkValueOn,
+		}, nil
+	}
+}
+
+const (
+	TriBoolTrue  = 1
+	TriBoolDetc  = 2
+	TriBoolFalse = 0
+)
+
+type TriBoolArgDirective struct {
+	Tk    int
+	Value int // 1: on; 2: DetectionOnly; 0: off
+}
+
+func (d *TriBoolArgDirective) Token() int {
+	return d.Tk
+}
+
+func TriBoolArgDirectiveFactory(tk int) DirectiveFactory {
+	val := map[int]int{
+		TkValueOn:   1,
+		TkValueDetc: 2,
+		TkValueOff:  0,
+	}
+	return func(s *Scanner) (Directive, error) {
+		tkVal, _, err := s.ReadValue(TkValueOn, TkValueOff, TkValueDetc)
+		if err != nil {
+			return nil, err
+		}
+		return &TriBoolArgDirective{
+			Tk:    tk,
+			Value: val[tkVal],
+		}, nil
+	}
+}
+
+type Variable struct {
+	Tk        int
+	Index     string
+	Count     bool
+	Exclusion bool
+}
+
+type Operator struct {
+	Tk       int
+	Not      bool
+	Argument string
+}
+
+type RuleDirective struct {
+	Variable []*Variable
+}
+
+func (d *RuleDirective) Token() int {
+	return TkDirRule
+}
+
+func RuleDirectiveScaner(s *Scanner) (Directive, error) {
+	rule := &RuleDirective{}
+	vars, err := s.ReadVariables()
+	if err != nil {
+		return nil, err
+	}
+	rule.Variable = vars
+	actions, err := s.ReadString()
+	if err != nil {
+		return nil, err
+	}
+	_ = actions
+	return rule, nil
 }

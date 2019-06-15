@@ -39,7 +39,23 @@ const (
 	TkVarResponseHeadersNames
 	TkVarResponseProtocol
 	TkVarResponseStatus
+	// operator
+	TkOpRx
+	TkOpEq
+	TkOpGe
+	TkOpGt
+	TkOpLe
+	TkOpLt
 )
+
+var operatorMap = map[string]int{
+	"rx": TkOpRx,
+	"eq": TkOpEq,
+	"ge": TkOpGe,
+	"gt": TkOpGt,
+	"le": TkOpLe,
+	"lt": TkOpLt,
+}
 
 var variableMap = map[string]int{
 	"ARGS":                    TkVarArgs,
