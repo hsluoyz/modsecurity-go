@@ -14,6 +14,31 @@ type expect struct {
 	str []string
 }
 
+func TestReadString(t *testing.T) {
+	var rules = map[string]string{
+		`abc`:            `abc`,
+		"abc\\\ndef":     "abc\ndef",
+		"\\\ndef":        "def",
+		"\t def":         "def",
+		"\t 'def'":       "def",
+		`"def"`:          "def",
+		"\"abc\\\ndef\"": "abc\ndef",
+	}
+	for rule, expect := range rules {
+		scaner := NewSecLangScannerFromString(rule)
+		d, err := scaner.ReadString()
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if d != expect {
+			t.Error(fmt.Errorf("rule: '%s', expect '%s', got '%s'", rule, expect, d))
+			return
+		}
+
+	}
+}
+
 func TestSecLangSimpleDirectives(t *testing.T) {
 	one := func(rule string) Directive {
 		scan := NewSecLangScanner(strings.NewReader(rule))

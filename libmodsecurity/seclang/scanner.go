@@ -65,6 +65,7 @@ func (s *Scanner) ReadWord() string {
 func (s *Scanner) ReadString() (string, error) {
 	s.SkipBlank()
 	if isNewLine(s.current) {
+		s.incrementLineNumber()
 		return "", nil
 	}
 	if s.current == '"' {
@@ -82,8 +83,6 @@ func (s *Scanner) ReadString() (string, error) {
 func (s *Scanner) readString(delimiter ...rune) (string, error) {
 	if runeInSlice(s.current, delimiter) {
 		s.advance()
-	} else {
-		s.saveAndAdvance()
 	}
 	for !runeInSlice(s.current, delimiter) {
 		switch s.current {
@@ -340,8 +339,8 @@ func (s *Scanner) SkipBlank() error {
 			s.advance()
 		case s.current == '\\':
 			if s.next() == '\n' {
-				s.advance() //skip '\\'
-				s.advance() //skip '\n'
+				s.advance()             //skip '\\'
+				s.incrementLineNumber() // skip newlines
 
 			}
 		default:
