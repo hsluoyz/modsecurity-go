@@ -9,7 +9,7 @@ The current goal is to implement [ModSecurity Rules Language Porting Specificati
 
 TODO:
 
-- [-] SecLang parser
+- [x] SecLang parser
 - [ ] Implement SecLang Processor (WIP)
 - [ ] Implement SecLang [Level 1](https://github.com/SpiderLabs/ModSecurity/wiki/ModSecurity-Rules-Language-Porting-Specification#level-1-core-features)
 - [ ] Compatible with [OWASP](https://github.com/SpiderLabs/owasp-modsecurity-crs)
