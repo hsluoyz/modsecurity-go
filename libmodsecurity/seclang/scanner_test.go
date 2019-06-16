@@ -281,3 +281,20 @@ SecRule ARGS|ARGS_NAMES|REQUEST_COOKIES|!REQUEST_COOKIES:/__utm/|REQUEST_COOKIES
 		}
 	})
 }
+
+func TestSecLangRules(t *testing.T) {
+	scaner := NewSecLangScannerFromString(testRules1)
+	d, err := scaner.AllDirective()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(d, testRules1Expect) {
+		t.Errorf("testRule1 not match")
+		fmt.Println("===== testRule1 expected ====")
+		spew.Dump(testRules1Expect)
+		fmt.Println("===== testRule1 acture ====")
+		spew.Dump(d)
+	}
+}

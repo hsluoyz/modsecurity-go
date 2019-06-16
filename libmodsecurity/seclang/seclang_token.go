@@ -66,9 +66,12 @@ const (
 	TkActionVer
 	TkActionLogData
 	TkActionSetVar
+	TkActionCapture
+	TkActionPass
 	// transform action
 	TkTransLowercase
 	TkTransUrlDecode
+	TkTransUrlDecodeUni
 	TkTransNone
 	TkTransCompressWhitespace
 	TkTransRemoveWhitespace
@@ -97,17 +100,19 @@ var actionMap = map[string]int{
 	"deny":     TkActionDeny,
 	"block":    TkActionBlock,
 	"status":   TkActionStatus,
-	"hase":     TkActionpHase,
+	"phase":    TkActionPhase,
 	"t":        TkActionT,
 	"skip":     TkActionSkip,
 	"chain":    TkActionChain,
-	"phase":    TkActionPhase,
 	"logdata":  TkActionLogData,
 	"setvar":   TkActionSetVar,
+	"capture":  TkActionCapture,
+	"pass":     TkActionPass,
 }
 var transformationMap = map[string]int{
 	"lowercase":          TkTransLowercase,
 	"urlDecode":          TkTransUrlDecode,
+	"urlDecodeUni":       TkTransUrlDecodeUni,
 	"none":               TkTransNone,
 	"compressWhitespace": TkTransCompressWhitespace,
 	"removeWhitespace":   TkTransRemoveWhitespace,

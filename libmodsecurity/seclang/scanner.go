@@ -23,6 +23,8 @@ var escapes map[rune]rune = map[rune]rune{
 	'a': '\a', 'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t', 'v': '\v', '\\': '\\', '"': '"', '\'': '\'',
 }
 
+var ErrEOS = errors.New("EOS")
+
 type Directive interface {
 	Token() int
 }
@@ -44,34 +46,8 @@ func NewSecLangScanner(r io.Reader) *Scanner {
 	}
 }
 
-func (s *Scanner) ReadDirective() (Directive, error) {
-	if s.current == BOS {
-		s.advance()
-	}
-	for {
-		switch c := s.current; c {
-		case '\n', '\r':
-			s.incrementLineNumber()
-		case ' ', '\f', '\t', '\v':
-			s.advance()
-		case 0:
-			s.advance()
-		default:
-			if s.StartsWith("sec") {
-				return s.readDirective()
-			}
-			return nil, fmt.Errorf("expect directive got string `%s`", s.buffer.String())
-		}
-	}
-}
-
-func (s *Scanner) readDirective() (Directive, error) {
-	dir := s.ReadWord()
-	td := DirectiveFromString(dir)
-	if td == nil {
-		return nil, fmt.Errorf("string %s is not directive", dir)
-	}
-	return td.Func(s)
+func NewSecLangScannerFromString(s string) *Scanner {
+	return NewSecLangScanner(strings.NewReader(s))
 }
 
 func (s *Scanner) ReadWord() string {
@@ -86,6 +62,114 @@ func (s *Scanner) ReadWord() string {
 	}
 }
 
+func (s *Scanner) ReadString() (string, error) {
+	s.SkipBlank()
+	if isNewLine(s.current) {
+		return "", nil
+	}
+	if s.current == '"' {
+		return s.readString('"')
+	}
+	if s.current == '\'' {
+		return s.readString('\'')
+	}
+	if s.current == EOS {
+		return "", ErrEOS
+	}
+	return s.readString(' ', '\f', '\t', '\v', '\n', '\r', EOS)
+}
+
+func (s *Scanner) readString(delimiter ...rune) (string, error) {
+	if runeInSlice(s.current, delimiter) {
+		s.advance()
+	} else {
+		s.saveAndAdvance()
+	}
+	for !runeInSlice(s.current, delimiter) {
+		switch s.current {
+		case EOS:
+			if s.buffer.Len() > 0 {
+				return "", fmt.Errorf("unexpected EOS after %s", s.buffer.String())
+			}
+			return "", nil
+		case '\n', '\r':
+			return "", errors.New("unfinished string got newline")
+		case '\\':
+			s.advance()
+			c := s.current
+			switch esc, ok := escapes[c]; {
+			case ok:
+				s.advanceAndSave(esc)
+			case isNewLine(c):
+				s.incrementLineNumber()
+				s.save('\n')
+			case c == EOS:
+				return "", fmt.Errorf("unexpected EOS after %s", s.buffer.String())
+			default:
+				s.saveAndAdvance()
+			}
+		default:
+			s.saveAndAdvance()
+		}
+	}
+
+	s.advance()
+	str := s.buffer.String()
+	s.buffer.Reset()
+	return str, nil
+}
+
+func (s *Scanner) ReadDirective() (Directive, error) {
+	if s.current == BOS {
+		s.advance()
+	}
+	for {
+		switch c := s.current; c {
+		case '\n', '\r':
+			s.incrementLineNumber()
+		case ' ', '\f', '\t', '\v':
+			s.advance()
+		case 0:
+			s.advance()
+		case EOS:
+			return nil, ErrEOS
+		default:
+			if s.StartsWith("sec") {
+				dir, err := s.readDirective()
+				if err == ErrEOS {
+					return nil, errors.New("unexpected EOS")
+				}
+				return dir, err
+			}
+			return nil, fmt.Errorf("expect directive got string `%s`", s.buffer.String())
+		}
+	}
+}
+
+func (s *Scanner) AllDirective() ([]Directive, error) {
+	var dirs []Directive
+	for {
+		d, err := s.ReadDirective()
+		if err == ErrEOS {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		dirs = append(dirs, d)
+	}
+	return dirs, nil
+}
+
+func (s *Scanner) readDirective() (Directive, error) {
+	dir := s.ReadWord()
+	td := DirectiveFromString(dir)
+	if td == nil {
+		return nil, fmt.Errorf("string %s is not directive", dir)
+	}
+	return td.Func(s)
+}
+
 func (s *Scanner) ReadVariables() ([]*Variable, error) {
 	res := make([]*Variable, 0, 1)
 	argString, err := s.ReadString()
@@ -93,7 +177,7 @@ func (s *Scanner) ReadVariables() ([]*Variable, error) {
 		return nil, err
 	}
 	if len(argString) == 0 {
-		return nil, nil
+		return nil, errors.New("expected variable bug got empty")
 	}
 
 	args := splitMulti(argString, ",|")
@@ -132,7 +216,7 @@ func (s *Scanner) ReadOperator() (*Operator, error) {
 		return nil, err
 	}
 	if len(opString) == 0 {
-		return nil, nil
+		return nil, errors.New("expected operator bug got empty")
 	}
 	if len(opString) > 0 && opString[0] == '!' {
 		res.Not = true
@@ -169,7 +253,7 @@ func (s *Scanner) ReadActions() (*Actions, error) {
 	str = strings.TrimSpace(str)
 	// str = strings.Trim(str, "\r\n\t\f\v ")
 	if len(str) == 0 {
-		return nil, nil
+		return nil, errors.New("expected actions bug got empty")
 	}
 	acts := strings.Split(str, ",")
 	for _, act := range acts {
@@ -247,20 +331,6 @@ func parseAction(act string) (int, string, error) {
 	return tk, arg, nil
 }
 
-func (s *Scanner) ReadString() (string, error) {
-	s.SkipBlank()
-	if isNewLine(s.current) {
-		return "", nil
-	}
-	if s.current == '"' {
-		return s.readString('"')
-	}
-	if s.current == '\'' {
-		return s.readString('\'')
-	}
-	return s.readString(' ', '\f', '\t', '\v', '\n', '\r', EOS)
-}
-
 func (s *Scanner) SkipBlank() error {
 	for {
 		switch {
@@ -279,42 +349,6 @@ func (s *Scanner) SkipBlank() error {
 
 		}
 	}
-}
-
-func (s *Scanner) readString(delimiter ...rune) (string, error) {
-	if runeInSlice(s.current, delimiter) {
-		s.advance()
-	} else {
-		s.saveAndAdvance()
-	}
-	for !runeInSlice(s.current, delimiter) {
-		switch s.current {
-		case EOS:
-			return "", errors.New("unfinished string got EOS")
-		case '\n', '\r':
-			return "", errors.New("unfinished string got newline")
-		case '\\':
-			s.advance()
-			c := s.current
-			switch esc, ok := escapes[c]; {
-			case ok:
-				s.advanceAndSave(esc)
-			case isNewLine(c):
-				s.incrementLineNumber()
-				s.save('\n')
-			case c == EOS: // do nothing
-			default:
-				s.saveAndAdvance()
-			}
-		default:
-			s.saveAndAdvance()
-		}
-	}
-
-	s.advance()
-	str := s.buffer.String()
-	s.buffer.Reset()
-	return str, nil
 }
 
 func (s *Scanner) ReadValue(tks ...int) (int, string, error) {
