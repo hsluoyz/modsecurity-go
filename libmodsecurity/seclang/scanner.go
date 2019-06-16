@@ -133,14 +133,11 @@ func (s *Scanner) ReadDirective() (Directive, error) {
 		case EOS:
 			return nil, ErrEOS
 		default:
-			if s.StartsWith("sec") {
-				dir, err := s.readDirective()
-				if err == ErrEOS {
-					return nil, errors.New("unexpected EOS")
-				}
-				return dir, err
+			dir, err := s.readDirective()
+			if err == ErrEOS {
+				return nil, errors.New("unexpected EOS")
 			}
-			return nil, fmt.Errorf("expect directive got string `%s`", s.buffer.String())
+			return dir, err
 		}
 	}
 }
