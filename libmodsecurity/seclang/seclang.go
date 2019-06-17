@@ -5,8 +5,8 @@ func init() {
 }
 
 func initDirectives() {
-	registerDir(TkDirRule, `SecRule`, RuleDirectiveScaner)
-	registerDir(TkDirRuleEng, `SecRuleEngine`, TriBoolArgDirectiveFactory(TkDirRuleEng))
-	registerDir(TkDirReqBody, `SecRequestBodyAccess`, BoolArgDirectiveFactory(TkDirReqBody))
-	registerDir(TkDirResBody, `SecResponseBodyAccess`, BoolArgDirectiveFactory(TkDirResBody))
+	RegisterDir(TkDirRule, `SecRule`, RuleDirectiveScaner)
+	RegisterDir(TkDirRuleEng, `SecRuleEngine`, TriBoolArgDirectiveFactory(TkDirRuleEng))
+	RegisterDir(TkDirReqBody, `SecRequestBodyAccess`, BoolArgDirectiveFactory(TkDirReqBody))
+	RegisterDir(TkDirResBody, `SecResponseBodyAccess`, BoolArgDirectiveFactory(TkDirResBody))
 }

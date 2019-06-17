@@ -77,6 +77,7 @@ const (
 	TkTransRemoveWhitespace
 	TkTransReplaceNulls
 	TkTransRemoveNulls
+	TkEND
 )
 
 var operatorMap = map[string]int{
@@ -187,9 +188,9 @@ type ValueDesc struct {
 func init() {
 	Values = make(map[int]*ValueDesc)
 
-	registerValue(TkValueDetc, `DetectionOnly`)
-	registerValue(TkValueOff, `Off`)
-	registerValue(TkValueOn, `On`)
+	RegisterValue(TkValueDetc, `DetectionOnly`)
+	RegisterValue(TkValueOff, `Off`)
+	RegisterValue(TkValueOn, `On`)
 }
 
 var Directives map[int]*DirectiveDesc
@@ -204,7 +205,7 @@ func DirectiveFromString(str string) *DirectiveDesc {
 	return Directives[token]
 }
 
-func registerDir(tk int, name string, f DirectiveFactory) {
+func RegisterDir(tk int, name string, f DirectiveFactory) {
 	if Directives == nil {
 		Directives = make(map[int]*DirectiveDesc)
 	}
@@ -219,7 +220,7 @@ func registerDir(tk int, name string, f DirectiveFactory) {
 	dirIndex[strings.ToLower(name)] = tk
 }
 
-func registerValue(tk int, regex string) {
+func RegisterValue(tk int, regex string) {
 	Values[tk] = &ValueDesc{
 		Regex: regex,
 		Token: tk,
