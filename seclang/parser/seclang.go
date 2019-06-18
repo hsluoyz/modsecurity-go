@@ -1,4 +1,4 @@
-package seclang
+package parser
 
 func init() {
 	initDirectives()

@@ -1,9 +1,10 @@
-package libmodsecruity
+package seclang
 
 import (
 	"fmt"
 
-	"github.com/senghoo/modsecurity-go/libmodsecurity/seclang"
+	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
 func init() {
@@ -23,22 +24,22 @@ func NewRequestBodyAccess(enable bool) Rule {
 }
 
 func (*RuleRequestBodyAccess) Token() int {
-	return seclang.TkDirReqBody
+	return parser.TkDirReqBody
 }
 
-func (r *RuleRequestBodyAccess) FromSecLang(d seclang.Directive) (Rule, error) {
+func (r *RuleRequestBodyAccess) FromSecLang(d parser.Directive) (Rule, error) {
 	if d.Token() != r.Token() {
 		return nil, fmt.Errorf("RuleRequestBodyAccess expect directive with token %d, but %d", r.Token(), d.Token())
 	}
-	dd, ok := d.(*seclang.BoolArgDirective)
+	dd, ok := d.(*parser.BoolArgDirective)
 	if !ok {
 		fmt.Errorf("RuleRequestBodyAccess can't accpet directive %#v", d)
 	}
 	return NewRequestBodyAccess(dd.Value), nil
 }
 
-func (r *RuleRequestBodyAccess) Execute(e *Engine) error {
-	e.RequestBodyAccess(r.enable)
+func (r *RuleRequestBodyAccess) Execute(e *modsecurity.Engine) error {
+	e.RequestBodyAccess = r.enable
 	return nil
 }
 
@@ -54,21 +55,21 @@ func NewResponseBodyAccess(enable bool) Rule {
 }
 
 func (*RuleResponseBodyAccess) Token() int {
-	return seclang.TkDirResBody
+	return parser.TkDirResBody
 }
 
-func (r *RuleResponseBodyAccess) FromSecLang(d seclang.Directive) (Rule, error) {
+func (r *RuleResponseBodyAccess) FromSecLang(d parser.Directive) (Rule, error) {
 	if d.Token() != r.Token() {
 		return nil, fmt.Errorf("RuleResponseBodyAccess expect directive with token %d, but %d", r.Token(), d.Token())
 	}
-	dd, ok := d.(*seclang.BoolArgDirective)
+	dd, ok := d.(*parser.BoolArgDirective)
 	if !ok {
 		fmt.Errorf("RuleResponseBodyAccess can't accpet directive %#v", d)
 	}
 	return NewResponseBodyAccess(dd.Value), nil
 }
 
-func (r *RuleResponseBodyAccess) Execute(e *Engine) error {
-	e.ResponseBodyAccess(r.enable)
+func (r *RuleResponseBodyAccess) Execute(e *modsecurity.Engine) error {
+	e.ResponseBodyAccess = r.enable
 	return nil
 }

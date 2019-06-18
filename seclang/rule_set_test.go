@@ -1,36 +1,40 @@
-package libmodsecruity
+package seclang
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/senghoo/modsecurity-go/modsecurity"
+)
 
 func TestSimpleDirectiveFromSecLang(t *testing.T) {
 	var rule string
 	rule = "SecRequestBodyAccess On"
 	t.Run(rule, func(t *testing.T) {
-		eng := NewEngine()
+		eng := modsecurity.NewEngine()
 		rs, err := NewRuleSetFromSecLangString(rule)
 		if err != nil {
 			t.Error(err)
 		}
-		err = eng.AddRuleSet(rs)
+		err = rs.Execute(eng)
 		if err != nil {
 			t.Error(err)
 		}
-		if eng.requestBodyAccess != true {
+		if eng.RequestBodyAccess != true {
 			t.Errorf("%s expect make requestBodyAccess ture but not", rule)
 		}
 	})
 	rule = "SecResponseBodyAccess On"
 	t.Run(rule, func(t *testing.T) {
-		eng := NewEngine()
+		eng := modsecurity.NewEngine()
 		rs, err := NewRuleSetFromSecLangString(rule)
 		if err != nil {
 			t.Error(err)
 		}
-		err = eng.AddRuleSet(rs)
+		err = rs.Execute(eng)
 		if err != nil {
 			t.Error(err)
 		}
-		if eng.responseBodyAccess != true {
+		if eng.ResponseBodyAccess != true {
 			t.Errorf("%s expect make responseBodyAccess ture but not", rule)
 		}
 	})

@@ -1,4 +1,4 @@
-package seclang
+package parser
 
 // some rules from OWASP
 var testRules1 = `

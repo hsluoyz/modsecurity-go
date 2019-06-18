@@ -1,9 +1,10 @@
-package libmodsecruity
+package seclang
 
 import (
 	"fmt"
 
-	"github.com/senghoo/modsecurity-go/libmodsecurity/seclang"
+	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
 var ruleTypes = make(map[int]RuleFromSecLang)
@@ -17,7 +18,7 @@ func RegisterSecLangRule(rule RuleFromSecLang) {
 	ruleTypes[tk] = rule
 }
 
-func ParseDirective(d seclang.Directive) (Rule, error) {
+func ParseDirective(d parser.Directive) (Rule, error) {
 	t, has := ruleTypes[d.Token()]
 	if !has {
 		return nil, fmt.Errorf("token %d not implemented", d.Token())
@@ -42,7 +43,7 @@ type RuleSet struct {
 }
 
 func (rs *RuleSet) AddSecLangString(str string) error {
-	scanner := seclang.NewSecLangScannerFromString(str)
+	scanner := parser.NewSecLangScannerFromString(str)
 	dirs, err := scanner.AllDirective()
 	if err != nil {
 		return err
@@ -57,7 +58,7 @@ func (rs *RuleSet) AddSecLangString(str string) error {
 	return nil
 }
 
-func (rs *RuleSet) Execute(e *Engine) error {
+func (rs *RuleSet) Execute(e *modsecurity.Engine) error {
 	for _, rule := range rs.rules {
 		if err := rule.Execute(e); err != nil {
 			return err
@@ -67,10 +68,10 @@ func (rs *RuleSet) Execute(e *Engine) error {
 }
 
 type Rule interface {
-	Execute(*Engine) error
+	Execute(*modsecurity.Engine) error
 }
 
 type RuleFromSecLang interface {
 	Token() int
-	FromSecLang(seclang.Directive) (Rule, error)
+	FromSecLang(parser.Directive) (Rule, error)
 }

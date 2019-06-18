@@ -1,4 +1,4 @@
-package seclang
+package parser
 
 import (
 	"fmt"
