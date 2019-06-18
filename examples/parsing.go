@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/senghoo/modsecurity-go/libmodsecurity/seclang"
+	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
 var rules = `
@@ -45,7 +45,7 @@ SecRule REQUEST_HEADERS:User-Agent "@rx ^$" \
 `
 
 func main() {
-	scaner := seclang.NewSecLangScannerFromString(rules)
+	scaner := parser.NewSecLangScannerFromString(rules)
 	d, err := scaner.AllDirective()
 	if err != nil {
 		panic(err)

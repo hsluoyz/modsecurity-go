@@ -10,17 +10,12 @@ import (
 func init() {
 	RegisterSecLangRule(new(RuleRequestBodyAccess))
 	RegisterSecLangRule(new(RuleResponseBodyAccess))
+	RegisterSecLangRule(new(RuleSecRuleEngine))
 }
 
 // RuleRequestBodyAccess
 type RuleRequestBodyAccess struct {
 	enable bool
-}
-
-func NewRequestBodyAccess(enable bool) Rule {
-	return &RuleRequestBodyAccess{
-		enable: enable,
-	}
 }
 
 func (*RuleRequestBodyAccess) Token() int {
@@ -33,9 +28,9 @@ func (r *RuleRequestBodyAccess) FromSecLang(d parser.Directive) (Rule, error) {
 	}
 	dd, ok := d.(*parser.BoolArgDirective)
 	if !ok {
-		fmt.Errorf("RuleRequestBodyAccess can't accpet directive %#v", d)
+		return nil, fmt.Errorf("RuleRequestBodyAccess can't accpet directive %#v", d)
 	}
-	return NewRequestBodyAccess(dd.Value), nil
+	return &RuleRequestBodyAccess{dd.Value}, nil
 }
 
 func (r *RuleRequestBodyAccess) Execute(e *modsecurity.Engine) error {
@@ -48,12 +43,6 @@ type RuleResponseBodyAccess struct {
 	enable bool
 }
 
-func NewResponseBodyAccess(enable bool) Rule {
-	return &RuleResponseBodyAccess{
-		enable: enable,
-	}
-}
-
 func (*RuleResponseBodyAccess) Token() int {
 	return parser.TkDirResBody
 }
@@ -64,12 +53,44 @@ func (r *RuleResponseBodyAccess) FromSecLang(d parser.Directive) (Rule, error) {
 	}
 	dd, ok := d.(*parser.BoolArgDirective)
 	if !ok {
-		fmt.Errorf("RuleResponseBodyAccess can't accpet directive %#v", d)
+		return nil, fmt.Errorf("RuleResponseBodyAccess can't accpet directive %#v", d)
 	}
-	return NewResponseBodyAccess(dd.Value), nil
+	return &RuleResponseBodyAccess{dd.Value}, nil
 }
 
 func (r *RuleResponseBodyAccess) Execute(e *modsecurity.Engine) error {
 	e.ResponseBodyAccess = r.enable
+	return nil
+}
+
+// RuleSecRuleEngine
+type RuleSecRuleEngine struct {
+	value int
+}
+
+func (*RuleSecRuleEngine) Token() int {
+	return parser.TkDirRuleEng
+}
+
+func (r *RuleSecRuleEngine) FromSecLang(d parser.Directive) (Rule, error) {
+	if d.Token() != r.Token() {
+		return nil, fmt.Errorf("RuleResponseBodyAccess expect directive with token %d, but %d", r.Token(), d.Token())
+	}
+	dd, ok := d.(*parser.TriBoolArgDirective)
+	if !ok {
+		return nil, fmt.Errorf("RuleResponseBodyAccess can't accpet directive %#v", d)
+	}
+	return &RuleSecRuleEngine{dd.Value}, nil
+}
+
+func (r *RuleSecRuleEngine) Execute(e *modsecurity.Engine) error {
+	switch r.value {
+	case parser.TriBoolTrue:
+		e.Enable(modsecurity.StatusOn)
+	case parser.TriBoolFalse:
+		e.Enable(modsecurity.StatusOff)
+	case parser.TriBoolElse:
+		e.Enable(modsecurity.StatusDect)
+	}
 	return nil
 }

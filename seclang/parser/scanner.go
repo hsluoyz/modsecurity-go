@@ -462,7 +462,7 @@ func BoolArgDirectiveFactory(tk int) DirectiveFactory {
 
 const (
 	TriBoolTrue  = 1
-	TriBoolDetc  = 2
+	TriBoolElse  = 2
 	TriBoolFalse = 0
 )
 
@@ -477,12 +477,12 @@ func (d *TriBoolArgDirective) Token() int {
 
 func TriBoolArgDirectiveFactory(tk int) DirectiveFactory {
 	val := map[int]int{
-		TkValueOn:   1,
-		TkValueDetc: 2,
-		TkValueOff:  0,
+		TkValueOn:   TriBoolTrue,
+		TkValueElse: TriBoolElse,
+		TkValueOff:  TriBoolFalse,
 	}
 	return func(s *Scanner) (Directive, error) {
-		tkVal, _, err := s.ReadValue(TkValueOn, TkValueOff, TkValueDetc)
+		tkVal, _, err := s.ReadValue(TkValueOn, TkValueOff, TkValueElse)
 		if err != nil {
 			return nil, err
 		}

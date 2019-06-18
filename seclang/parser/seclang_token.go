@@ -14,7 +14,7 @@ const (
 	TkDirRuleEng
 	TkDirReqBody
 	TkDirResBody
-	TkValueDetc
+	TkValueElse
 	TkValueOff
 	TkValueOn
 	// variables
@@ -188,7 +188,7 @@ type ValueDesc struct {
 func init() {
 	Values = make(map[int]*ValueDesc)
 
-	RegisterValue(TkValueDetc, `DetectionOnly`)
+	RegisterValue(TkValueElse, `DetectionOnly`)
 	RegisterValue(TkValueOff, `Off`)
 	RegisterValue(TkValueOn, `On`)
 }
