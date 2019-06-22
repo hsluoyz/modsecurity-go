@@ -41,7 +41,7 @@ SecRule REQUEST_HEADERS:User-Agent "@rx ^$" \
 var testRules1Expect = []Directive{
 	&TriBoolArgDirective{
 		Tk:    TkDirRuleEng,
-		Value: TriBoolDetc,
+		Value: TriBoolElse,
 	},
 	&BoolArgDirective{
 		Tk:    TkDirReqBody,
@@ -67,17 +67,6 @@ var testRules1Expect = []Directive{
 		Actions: &Actions{
 			Id:    942160,
 			Phase: 2,
-			Tags: []string{
-				"application-multi",
-				"language-multi",
-				"platform-multi",
-				"attack-sqli",
-				"OWASP_CRS/WEB_ATTACK/SQL_INJECTION",
-			},
-			Msg: []string{
-				"Detects blind sqli tests using sleep() or benchmark().",
-			},
-			Severity: severityMap["CRITICAL"],
 			Trans: []*Trans{
 				&Trans{Tk: TkTransNone},
 				&Trans{Tk: TkTransUrlDecodeUni},
@@ -85,22 +74,17 @@ var testRules1Expect = []Directive{
 			Action: []*Action{
 				&Action{Tk: TkActionBlock},
 				&Action{Tk: TkActionCapture},
-				&Action{
-					Tk:       TkActionLogData,
-					Argument: "'Matched Data: %{TX.0} found within %{MATCHED_VAR_NAME}: %{MATCHED_VAR}'",
-				},
-				&Action{
-					Tk:       TkActionVer,
-					Argument: "'OWASP_CRS/3.1.0'",
-				},
-				&Action{
-					Tk:       TkActionSetVar,
-					Argument: "'tx.sql_injection_score=+%{tx.critical_anomaly_score}'",
-				},
-				&Action{
-					Tk:       TkActionSetVar,
-					Argument: "'tx.anomaly_score_pl1=+%{tx.critical_anomaly_score}'",
-				},
+				&Action{Tk: TkActionMsg, Argument: "Detects blind sqli tests using sleep() or benchmark()."},
+				&Action{Tk: TkActionLogData, Argument: "'Matched Data: %{TX.0} found within %{MATCHED_VAR_NAME}: %{MATCHED_VAR}'"},
+				&Action{Tk: TkActionTag, Argument: "application-multi"},
+				&Action{Tk: TkActionTag, Argument: "language-multi"},
+				&Action{Tk: TkActionTag, Argument: "platform-multi"},
+				&Action{Tk: TkActionTag, Argument: "attack-sqli"},
+				&Action{Tk: TkActionTag, Argument: "OWASP_CRS/WEB_ATTACK/SQL_INJECTION"},
+				&Action{Tk: TkActionVer, Argument: "'OWASP_CRS/3.1.0'"},
+				&Action{Tk: TkActionSeverity, Argument: "2"},
+				&Action{Tk: TkActionSetVar, Argument: "'tx.sql_injection_score=+%{tx.critical_anomaly_score}'"},
+				&Action{Tk: TkActionSetVar, Argument: "'tx.anomaly_score_pl1=+%{tx.critical_anomaly_score}'"},
 			},
 		},
 	},
@@ -118,30 +102,20 @@ var testRules1Expect = []Directive{
 		Actions: &Actions{
 			Id:    920330,
 			Phase: 2,
-			Tags: []string{
-				"application-multi",
-				"language-multi",
-				"platform-multi",
-				"attack-protocol",
-				"OWASP_CRS/PROTOCOL_VIOLATION/EMPTY_HEADER_UA",
-			},
-			Msg: []string{
-				"Empty User Agent Header",
-			},
-			Severity: severityMap["NOTICE"],
 			Trans: []*Trans{
 				&Trans{Tk: TkTransNone},
 			},
 			Action: []*Action{
 				&Action{Tk: TkActionPass},
-				&Action{
-					Tk:       TkActionVer,
-					Argument: "'OWASP_CRS/3.1.0'",
-				},
-				&Action{
-					Tk:       TkActionSetVar,
-					Argument: "'tx.anomaly_score_pl1=+%{tx.notice_anomaly_score}'",
-				},
+				&Action{Tk: TkActionMsg, Argument: "Empty User Agent Header"},
+				&Action{Tk: TkActionTag, Argument: "application-multi"},
+				&Action{Tk: TkActionTag, Argument: "language-multi"},
+				&Action{Tk: TkActionTag, Argument: "platform-multi"},
+				&Action{Tk: TkActionTag, Argument: "attack-protocol"},
+				&Action{Tk: TkActionTag, Argument: "OWASP_CRS/PROTOCOL_VIOLATION/EMPTY_HEADER_UA"},
+				&Action{Tk: TkActionVer, Argument: "'OWASP_CRS/3.1.0'"},
+				&Action{Tk: TkActionSeverity, Argument: "5"},
+				&Action{Tk: TkActionSetVar, Argument: "'tx.anomaly_score_pl1=+%{tx.notice_anomaly_score}'"},
 			},
 		},
 	},

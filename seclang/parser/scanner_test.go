@@ -56,8 +56,8 @@ func TestSecLangSimpleDirectives(t *testing.T) {
 			`SecRuleEngine on`:            TriBoolTrue,
 			`SecRuleEngine Off`:           TriBoolFalse,
 			`secruleengine OFF`:           TriBoolFalse,
-			`SecRuleEngine DetectionOnly`: TriBoolDetc,
-			`SECRULEENGINE detectiononly`: TriBoolDetc,
+			`SecRuleEngine DetectionOnly`: TriBoolElse,
+			`SECRULEENGINE detectiononly`: TriBoolElse,
 		}
 		for rule, expectValue := range rules {
 			dir := one(rule)
@@ -264,21 +264,6 @@ SecRule ARGS|ARGS_NAMES|REQUEST_COOKIES|!REQUEST_COOKIES:/__utm/|REQUEST_COOKIES
 				Actions: &Actions{
 					Id:    944100,
 					Phase: 2,
-					Msg: []string{
-						"Remote Command Execution: Suspicious Java class detected",
-					},
-					Tags: []string{
-						"application-multi",
-						"language-java",
-						"platform-multi",
-						"attack-rce",
-						"OWASP_CRS/WEB_ATTACK/COMMAND_INJECTION",
-						"WASCTC/WASC-31",
-						"OWASP_TOP_10/A1",
-						"PCI/6.5.2",
-						"paranoia-level/1",
-					},
-					Severity: 2,
 					Trans: []*Trans{
 						&Trans{Tk: TkTransNone},
 						&Trans{Tk: TkTransLowercase},
@@ -286,8 +271,19 @@ SecRule ARGS|ARGS_NAMES|REQUEST_COOKIES|!REQUEST_COOKIES:/__utm/|REQUEST_COOKIES
 					Action: []*Action{
 						&Action{Tk: TkActionBlock, Argument: ""},
 						&Action{Tk: TkActionLog, Argument: ""},
+						&Action{Tk: TkActionMsg, Argument: "Remote Command Execution: Suspicious Java class detected"},
 						&Action{Tk: TkActionLogData, Argument: "'Matched Data: %{MATCHED_VAR} found within %{MATCHED_VAR_NAME}'"},
+						&Action{Tk: TkActionTag, Argument: "application-multi"},
+						&Action{Tk: TkActionTag, Argument: "language-java"},
+						&Action{Tk: TkActionTag, Argument: "platform-multi"},
+						&Action{Tk: TkActionTag, Argument: "attack-rce"},
+						&Action{Tk: TkActionTag, Argument: "OWASP_CRS/WEB_ATTACK/COMMAND_INJECTION"},
+						&Action{Tk: TkActionTag, Argument: "WASCTC/WASC-31"},
+						&Action{Tk: TkActionTag, Argument: "OWASP_TOP_10/A1"},
+						&Action{Tk: TkActionTag, Argument: "PCI/6.5.2"},
+						&Action{Tk: TkActionTag, Argument: "paranoia-level/1"},
 						&Action{Tk: TkActionVer, Argument: "'OWASP_CRS/3.1.0'"},
+						&Action{Tk: TkActionSeverity, Argument: "2"},
 						&Action{Tk: TkActionSetVar, Argument: "'tx.rce_score=+%{tx.critical_anomaly_score}'"},
 						&Action{Tk: TkActionSetVar, Argument: "'tx.anomaly_score_pl1=+%{tx.critical_anomaly_score}'"},
 					},

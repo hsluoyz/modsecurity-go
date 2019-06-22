@@ -262,25 +262,12 @@ func (s *Scanner) ReadActions() (*Actions, error) {
 			if err != nil {
 				return nil, fmt.Errorf("cannot parse id %s, err: %s", arg, err.Error())
 			}
-		case TkActionTag:
-			arg = trimQuote(arg)
-			if len(arg) == 0 {
-				return nil, fmt.Errorf("get empty tag value")
-			}
-			res.Tags = append(res.Tags, arg)
-		case TkActionMsg:
-			arg = trimQuote(arg)
-			if len(arg) == 0 {
-				return nil, fmt.Errorf("get empty msg value")
-			}
-			res.Msg = append(res.Msg, arg)
-		case TkActionRev:
-			arg = trimQuote(arg)
-			res.Rev = arg
 		case TkActionSeverity:
 			arg = trimQuote(arg)
 			if severity, has := severityMap[arg]; has {
-				res.Severity = severity
+				res.Action = append(res.Action, &Action{tk, strconv.Itoa(severity)})
+			} else if severity, err := strconv.Atoi(arg); err == nil && severity >= 0 && severity <= 7 {
+				res.Action = append(res.Action, &Action{tk, strconv.Itoa(severity)})
 			} else {
 				return nil, fmt.Errorf("unknown severity %s", arg)
 			}
@@ -306,6 +293,9 @@ func (s *Scanner) ReadActions() (*Actions, error) {
 				return nil, fmt.Errorf("unsupported phase %d", p)
 			}
 			res.Phase = p
+		case TkActionTag, TkActionMsg:
+			arg = trimQuote(arg)
+			res.Action = append(res.Action, &Action{tk, arg})
 		default:
 			res.Action = append(res.Action, &Action{tk, arg})
 		}
@@ -515,14 +505,10 @@ type Trans struct {
 }
 
 type Actions struct {
-	Id       int
-	Phase    int
-	Tags     []string
-	Msg      []string
-	Rev      string
-	Severity int
-	Trans    []*Trans
-	Action   []*Action
+	Id     int
+	Phase  int
+	Trans  []*Trans
+	Action []*Action
 }
 
 type RuleDirective struct {
