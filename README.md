@@ -3,6 +3,12 @@
 This Project is work in progress. Api will be changed frequently. Not recommended for production use.
 
 # ModSecurity-Go
+
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/senghoo/modsecurity-go)
+[![CI Status](https://travis-ci.org/senghoo/modsecurity-go.svg?branch=master)](https://travis-ci.org/senghoo/modsecurity-go)
+[![Coverage Status](https://coveralls.io/repos/github/senghoo/modsecurity-go/badge.svg?branch=master)](https://coveralls.io/github/senghoo/modsecurity-go?branch=master)
+[![License](https://img.shields.io/github/license/senghoo/modsecurity-go.svg)](https://github.com/senghoo/modsecurity-go/blob/master/LICENSE)
+
 ModSecurity-Go is golang port for [ModSecurity](https://github.com/SpiderLabs/ModSecurity).
 
 Project is Working in progress.

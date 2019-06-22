@@ -1,3 +1,4 @@
+// Seclang Parser.
 // Thanks to the go-lua project. The scanner referenced some of the go-lua scanner implementations. https://github.com/Shopify/go-lua
 package parser
 
