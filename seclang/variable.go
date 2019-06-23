@@ -8,10 +8,10 @@ import (
 )
 
 var variableFactorys map[int]VariableFactory = map[int]VariableFactory{
-	parser.TkVarRequestUri: factoryWrapper(modsecurity.NewVariableRequestURI),
+	parser.TkVarRequestUri: variableNoArgErrWrapper(modsecurity.NewVariableRequestURI),
 }
 
-func factoryWrapper(f func() modsecurity.Variable) func(v *parser.Variable) (modsecurity.Variable, error) {
+func variableNoArgErrWrapper(f func() modsecurity.Variable) func(v *parser.Variable) (modsecurity.Variable, error) {
 	return func(v *parser.Variable) (modsecurity.Variable, error) {
 		return f(), nil
 	}
@@ -31,7 +31,7 @@ func MakeVariables(vs []*parser.Variable) ([]modsecurity.Variable, error) {
 	for _, v := range vs {
 		factory, has = variableFactorys[v.Tk]
 		if !has {
-			return nil, fmt.Errorf("variable %s is not implemented", v.Name)
+			return nil, fmt.Errorf("variable %d is not implemented", v.Tk)
 		}
 		if !v.Count {
 			if variable, has = varMap[v.Tk]; !has {

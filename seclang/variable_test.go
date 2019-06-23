@@ -15,16 +15,20 @@ func TestMakeVariables(t *testing.T) {
 		vs, err := scan.ReadVariables()
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		variables, err := MakeVariables(vs)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		if len(variables) != 1 {
 			t.Error("expect one variable")
+			return
 		}
 		if v, ok := variables[0].(*modsecurity.VariableRequestURI); !ok {
 			t.Errorf("except VariableRequestURI got %#v", v)
+			return
 		}
 
 	})
@@ -35,20 +39,25 @@ func TestMakeVariables(t *testing.T) {
 		vs, err := scan.ReadVariables()
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		variables, err := MakeVariables(vs)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		if len(variables) != 1 {
 			t.Error("expect one variable")
+			return
 		}
 		countV, ok := variables[0].(*modsecurity.CountVariable)
 		if !ok {
 			t.Errorf("except CountVariable got %#v", countV)
+			return
 		}
 		if v, ok := countV.Variable.(*modsecurity.VariableRequestURI); !ok {
 			t.Errorf("except VariableRequestURI got %#v", v)
+			return
 		}
 
 	})

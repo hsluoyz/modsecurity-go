@@ -200,7 +200,6 @@ func (s *Scanner) ReadVariables() ([]*Variable, error) {
 			return nil, fmt.Errorf("unknown variable %s\n", a)
 		}
 		arg.Tk = tk
-		arg.Name = a
 		res = append(res, arg)
 	}
 
@@ -232,6 +231,9 @@ func (s *Scanner) ReadOperator() (*Operator, error) {
 	op := opWithArg[0]
 	if len(opWithArg) > 1 {
 		res.Argument = opWithArg[1]
+	}
+	if op[0] != '@' {
+		return nil, errors.New("operator must begin with @")
 	}
 	op = op[1:] // skip @
 	tk, has := operatorMap[op]
@@ -487,7 +489,6 @@ func TriBoolArgDirectiveFactory(tk int) DirectiveFactory {
 
 type Variable struct {
 	Tk        int
-	Name      string
 	Index     string
 	Count     bool
 	Exclusion bool

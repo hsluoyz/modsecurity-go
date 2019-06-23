@@ -36,7 +36,7 @@ func (r *RuleSecRule) FromSecLang(d parser.Directive) (Rule, error) {
 	if err != nil {
 		return nil, err
 	}
-	operator, err := makeOperator(dd.Operator)
+	operator, err := MakeOperator(dd.Operator)
 	if err != nil {
 		return nil, err
 	}
@@ -67,8 +67,5 @@ func makeTrans([]*parser.Trans) ([]modsecurity.Trans, error) {
 }
 
 func makeActions([]*parser.Action) ([]modsecurity.Action, error) {
-	return nil, nil
-}
-func makeOperator(*parser.Operator) (modsecurity.Operator, error) {
 	return nil, nil
 }
