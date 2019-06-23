@@ -232,9 +232,6 @@ func (s *Scanner) ReadOperator() (*Operator, error) {
 	if len(opWithArg) > 1 {
 		res.Argument = opWithArg[1]
 	}
-	if op[0] != '@' {
-		return nil, errors.New("operator must begin with @")
-	}
 	op = op[1:] // skip @
 	tk, has := operatorMap[op]
 	if !has {
