@@ -5,10 +5,13 @@ type Engine struct {
 	DetectionOnly      bool
 	RequestBodyAccess  bool
 	ResponseBodyAccess bool
+	RuleSet            *SecRuleSet
 }
 
 func NewEngine() *Engine {
-	return &Engine{}
+	return &Engine{
+		RuleSet: NewSecRuleSet(),
+	}
 }
 
 const (
@@ -30,4 +33,11 @@ func (e *Engine) Enable(status int) {
 		e.Enabled = false
 		e.DetectionOnly = true
 	}
+}
+
+func (e *Engine) AddSecRule(rules ...*SecRule) {
+	e.RuleSet.AddRules(rules...)
+}
+func (e *Engine) NewTransaction() *Transaction {
+	return NewTransaction(e, e.RuleSet)
 }

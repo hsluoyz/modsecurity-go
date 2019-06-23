@@ -200,6 +200,7 @@ func (s *Scanner) ReadVariables() ([]*Variable, error) {
 			return nil, fmt.Errorf("unknown variable %s\n", a)
 		}
 		arg.Tk = tk
+		arg.Name = a
 		res = append(res, arg)
 	}
 
@@ -486,6 +487,7 @@ func TriBoolArgDirectiveFactory(tk int) DirectiveFactory {
 
 type Variable struct {
 	Tk        int
+	Name      string
 	Index     string
 	Count     bool
 	Exclusion bool
