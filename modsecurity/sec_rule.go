@@ -2,11 +2,6 @@ package modsecurity
 
 import "github.com/sirupsen/logrus"
 
-type Trans interface {
-	Name() string
-	Trans(string) string
-}
-
 const (
 	PhaseBegin = iota
 	PhaseConnection
