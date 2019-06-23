@@ -32,7 +32,7 @@ func (r *RuleSecRule) FromSecLang(d parser.Directive) (Rule, error) {
 	if err != nil {
 		return nil, err
 	}
-	trans, err := makeTrans(dd.Actions.Trans)
+	trans, err := MakeTrans(dd.Actions.Trans)
 	if err != nil {
 		return nil, err
 	}
@@ -60,8 +60,4 @@ func (r *RuleSecRule) FromSecLang(d parser.Directive) (Rule, error) {
 func (r *RuleSecRule) Execute(e *modsecurity.Engine) error {
 	e.AddSecRule(r.rule)
 	return nil
-}
-
-func makeTrans([]*parser.Trans) ([]modsecurity.Trans, error) {
-	return nil, nil
 }
