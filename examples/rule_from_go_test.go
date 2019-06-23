@@ -7,7 +7,7 @@ import (
 	"github.com/senghoo/modsecurity-go/modsecurity"
 )
 
-func ExampleSimpleRule() {
+func ExampleRuleFromGo() {
 	// make engine
 	e := modsecurity.NewEngine()
 	// enable engine

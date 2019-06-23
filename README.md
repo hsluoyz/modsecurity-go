@@ -19,12 +19,56 @@ The current goal is to implement [ModSecurity Rules Language Porting Specificati
 TODO:
 
 - [x] SecLang parser
-- [ ] Implement SecLang Processor (WIP)
-- [ ] Implement SecLang [Level 1](https://github.com/SpiderLabs/ModSecurity/wiki/ModSecurity-Rules-Language-Porting-Specification#level-1-core-features)
+- [x] Implement SecLang Processor
+- [ ] Implement SecLang [Level 1](https://github.com/SpiderLabs/ModSecurity/wiki/ModSecurity-Rules-Language-Porting-Specification#level-1-core-features)(WIP)
 - [ ] Compatible with [OWASP](https://github.com/SpiderLabs/owasp-modsecurity-crs)
 
 
 # Usage 
+
+## Build Rules with SecLang
+
+For full example see [Rules with SecLang Example](https://github.com/senghoo/modsecurity-go/blob/master/examples/rule_from_seclang_test.go)
+
+```
+	rule := `SecRuleEngine On
+                 SecRule REQUEST_URI '@rx cmd' \
+                            "id:123,\
+                             phase:2,\
+                             t:lowercase,\
+                             deny"`
+
+	eng := modsecurity.NewEngine()
+	rs, err := seclang.NewRuleSetFromSecLangString(rule)
+	if err != nil {
+		panic(err)
+	}
+	err = rs.Execute(eng)
+	if err != nil {
+		panic(err)
+	}
+
+	ts := eng.NewTransaction()
+	ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")
+	u, err := url.Parse(`/search?="a';CMD echo '1"`)
+	if err != nil {
+		panic(err)
+	}
+	ts.ProcessRequestURL(u, "GET", "HTTP/1.1")
+	ts.ProcessRequestHeader(nil)
+	i := ts.Result()
+	utils.Pprint(i)
+	// Output:
+	// (*modsecurity.Intervention)({
+	//  Status: (int) 403,
+	//  Pause: (time.Duration) 0s,
+	//  Url: (*url.URL)(<nil>),
+	//  Log: ([]string) (len=1 cap=1) {
+	//   (string) (len=73) "[client 127.0.0.1:12345](phase 2)ModSecurity: Access denied with code 403"
+	//  },
+	//  Disruptive: (bool) true
+	// })
+```
 
 ## Build Rules with Go
 
