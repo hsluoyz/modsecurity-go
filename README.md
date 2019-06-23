@@ -84,7 +84,7 @@ For full example see [Rules with Go Example](https://github.com/senghoo/modsecur
 
 ## Seclang Parsing
 
-For full example see [Parser Example](https://github.com/senghoo/modsecurity-go/blob/master/examples/parsing.go)
+For full example see [Parser Example](https://github.com/senghoo/modsecurity-go/blob/master/examples/parsing_test.go)
 
 ```
 
