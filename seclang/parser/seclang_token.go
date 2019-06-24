@@ -19,6 +19,10 @@ const (
 	TkValueOn
 	// variables
 	TkVarArgs
+	TkVarArgsGet
+	TkVarArgsGetNames
+	TkVarArgsPost
+	TkVarArgsPostNames
 	TkVarArgsNames
 	TkVarQueryString
 	TkVarRemoteAddr
@@ -124,6 +128,10 @@ var transformationMap = map[string]int{
 var variableMap = map[string]int{
 	"ARGS":                    TkVarArgs,
 	"ARGS_NAMES":              TkVarArgsNames,
+	"ARGS_GET":                TkVarArgsGet,
+	"ARGS_GET_NAMES":          TkVarArgsGetNames,
+	"ARGS_POST":               TkVarArgsPost,
+	"ARGS_POST_NAMES":         TkVarArgsPostNames,
 	"QUERY_STRING":            TkVarQueryString,
 	"REMOTE_ADDR":             TkVarRemoteAddr,
 	"REQUEST_BASENAME":        TkVarRequestBasename,
