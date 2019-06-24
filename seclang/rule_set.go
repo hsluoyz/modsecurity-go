@@ -7,19 +7,19 @@ import (
 	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
-var ruleTypes = make(map[int]RuleFromSecLang)
+var direTypes = make(map[int]DireFromSecLang)
 
-func RegisterSecLangDire(rule RuleFromSecLang) {
-	tk := rule.Token()
-	exist, has := ruleTypes[tk]
+func RegisterDire(dire DireFromSecLang) {
+	tk := dire.Token()
+	exist, has := direTypes[tk]
 	if has {
-		panic(fmt.Errorf("rule with token %d already registered with %#v, cannot register %#v", tk, exist, rule))
+		panic(fmt.Errorf("dire with token %d already registered with %#v, cannot register %#v", tk, exist, dire))
 	}
-	ruleTypes[tk] = rule
+	direTypes[tk] = dire
 }
 
 func direFactory(d parser.Directive) (Dire, error) {
-	t, has := ruleTypes[d.Token()]
+	t, has := direTypes[d.Token()]
 	if !has {
 		return nil, fmt.Errorf("token %d not implemented", d.Token())
 	}
@@ -71,7 +71,7 @@ type Dire interface {
 	Execute(*modsecurity.Engine) error
 }
 
-type RuleFromSecLang interface {
+type DireFromSecLang interface {
 	Token() int
 	FromSecLang(parser.Directive) (Dire, error)
 }

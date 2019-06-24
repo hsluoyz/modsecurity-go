@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	RegisterSecLangDire(new(DireRule))
+	RegisterDire(new(DireRule))
 }
 
 // DireRequestBodyAccess

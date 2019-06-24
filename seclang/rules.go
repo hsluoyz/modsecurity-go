@@ -8,9 +8,9 @@ import (
 )
 
 func init() {
-	RegisterSecLangDire(new(DireRequestBodyAccess))
-	RegisterSecLangDire(new(DireResponseBodyAccess))
-	RegisterSecLangDire(new(DireRuleEngine))
+	RegisterDire(new(DireRequestBodyAccess))
+	RegisterDire(new(DireResponseBodyAccess))
+	RegisterDire(new(DireRuleEngine))
 }
 
 // DireRequestBodyAccess
