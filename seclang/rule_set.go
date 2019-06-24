@@ -9,7 +9,7 @@ import (
 
 var ruleTypes = make(map[int]RuleFromSecLang)
 
-func RegisterSecLangRule(rule RuleFromSecLang) {
+func RegisterSecLangDire(rule RuleFromSecLang) {
 	tk := rule.Token()
 	exist, has := ruleTypes[tk]
 	if has {
@@ -18,7 +18,7 @@ func RegisterSecLangRule(rule RuleFromSecLang) {
 	ruleTypes[tk] = rule
 }
 
-func ParseDirective(d parser.Directive) (Rule, error) {
+func direFactory(d parser.Directive) (Dire, error) {
 	t, has := ruleTypes[d.Token()]
 	if !has {
 		return nil, fmt.Errorf("token %d not implemented", d.Token())
@@ -26,11 +26,11 @@ func ParseDirective(d parser.Directive) (Rule, error) {
 	return t.FromSecLang(d)
 }
 
-func NewRuleSet() *RuleSet {
-	return &RuleSet{}
+func NewDireSet() *DireSet {
+	return &DireSet{}
 }
-func NewRuleSetFromSecLangString(rules string) (*RuleSet, error) {
-	rs := NewRuleSet()
+func NewDireSetFromSecLangString(rules string) (*DireSet, error) {
+	rs := NewDireSet()
 	err := rs.AddSecLangString(rules)
 	if err != nil {
 		return nil, err
@@ -38,40 +38,40 @@ func NewRuleSetFromSecLangString(rules string) (*RuleSet, error) {
 	return rs, nil
 }
 
-type RuleSet struct {
-	rules []Rule
+type DireSet struct {
+	dires []Dire
 }
 
-func (rs *RuleSet) AddSecLangString(str string) error {
+func (rs *DireSet) AddSecLangString(str string) error {
 	scanner := parser.NewSecLangScannerFromString(str)
 	dirs, err := scanner.AllDirective()
 	if err != nil {
 		return err
 	}
 	for _, dir := range dirs {
-		rule, err := ParseDirective(dir)
+		dire, err := direFactory(dir)
 		if err != nil {
 			return err
 		}
-		rs.rules = append(rs.rules, rule)
+		rs.dires = append(rs.dires, dire)
 	}
 	return nil
 }
 
-func (rs *RuleSet) Execute(e *modsecurity.Engine) error {
-	for _, rule := range rs.rules {
-		if err := rule.Execute(e); err != nil {
+func (rs *DireSet) Execute(e *modsecurity.Engine) error {
+	for _, dire := range rs.dires {
+		if err := dire.Execute(e); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-type Rule interface {
+type Dire interface {
 	Execute(*modsecurity.Engine) error
 }
 
 type RuleFromSecLang interface {
 	Token() int
-	FromSecLang(parser.Directive) (Rule, error)
+	FromSecLang(parser.Directive) (Dire, error)
 }

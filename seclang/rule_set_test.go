@@ -1,69 +1,82 @@
 package seclang
 
 import (
+	"fmt"
+	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/utils"
 )
 
-func TestSimpleDirectiveFromSecLang(t *testing.T) {
-	var rule string
-	rule = "SecRequestBodyAccess On"
-	t.Run(rule, func(t *testing.T) {
-		eng := modsecurity.NewEngine()
-		rs, err := NewRuleSetFromSecLangString(rule)
+func TestRuleSet(t *testing.T) {
+	rule := `SecRuleEngine On
+                 SecRule REQUEST_URI '@rx cmd' \
+                            "id:123,\
+                             phase:2,\
+                             t:lowercase,\
+                             deny"
+`
+	eng := modsecurity.NewEngine()
+	rs, err := NewDireSetFromSecLangString(rule)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	err = rs.Execute(eng)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	t.Run("deny", func(t *testing.T) {
+		ts := eng.NewTransaction()
+		ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")
+		u, err := url.Parse(`/search?="a';CMD echo '1"`)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		err = rs.Execute(eng)
-		if err != nil {
-			t.Error(err)
-			return
+		ts.ProcessRequestURL(u, "GET", "HTTP/1.1")
+		ts.ProcessRequestHeader(nil)
+		i := ts.Result()
+		expect := &modsecurity.Intervention{
+			Status: 403,
+			Log: []string{
+				"[client 127.0.0.1:12345](phase 2)ModSecurity: Access denied with code 403",
+			},
+			Disruptive: true,
 		}
-		if eng.RequestBodyAccess != true {
-			t.Errorf("%s expect make requestBodyAccess ture but not", rule)
-			return
+		if !reflect.DeepEqual(i, expect) {
+			fmt.Println("====expect====")
+			utils.Pprint(expect)
+			fmt.Println("====got====")
+			utils.Pprint(i)
+			t.Error("unmatch")
 		}
 	})
-	rule = "SecResponseBodyAccess On"
-	t.Run(rule, func(t *testing.T) {
-		eng := modsecurity.NewEngine()
-		rs, err := NewRuleSetFromSecLangString(rule)
+
+	t.Run("allow", func(t *testing.T) {
+		ts := eng.NewTransaction()
+		ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")
+		u, err := url.Parse(`/search?="a1"`)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		err = rs.Execute(eng)
-		if err != nil {
-			t.Error(err)
-			return
+		ts.ProcessRequestURL(u, "GET", "HTTP/1.1")
+		ts.ProcessRequestHeader(nil)
+		i := ts.Result()
+		expect := &modsecurity.Intervention{
+			Status: 200,
 		}
-		if eng.ResponseBodyAccess != true {
-			t.Errorf("%s expect make responseBodyAccess ture but not", rule)
-			return
-		}
-	})
-	rule = "SecRuleEngine On"
-	t.Run(rule, func(t *testing.T) {
-		eng := modsecurity.NewEngine()
-		rs, err := NewRuleSetFromSecLangString(rule)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		err = rs.Execute(eng)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if eng.Enabled != true {
-			t.Errorf("%s expect make Enabled ture but not", rule)
-			return
-		}
-		if eng.DetectionOnly == true {
-			t.Errorf("%s expect make DetectionOnly false but not", rule)
-			return
+		if !reflect.DeepEqual(i, expect) {
+			fmt.Println("====expect====")
+			utils.Pprint(expect)
+			fmt.Println("====got====")
+			utils.Pprint(i)
+			t.Error("unmatch")
 		}
 	})
 }

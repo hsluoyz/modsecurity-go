@@ -8,82 +8,82 @@ import (
 )
 
 func init() {
-	RegisterSecLangRule(new(RuleRequestBodyAccess))
-	RegisterSecLangRule(new(RuleResponseBodyAccess))
-	RegisterSecLangRule(new(RuleSecRuleEngine))
+	RegisterSecLangDire(new(DireRequestBodyAccess))
+	RegisterSecLangDire(new(DireResponseBodyAccess))
+	RegisterSecLangDire(new(DireRuleEngine))
 }
 
-// RuleRequestBodyAccess
-type RuleRequestBodyAccess struct {
+// DireRequestBodyAccess
+type DireRequestBodyAccess struct {
 	enable bool
 }
 
-func (*RuleRequestBodyAccess) Token() int {
+func (*DireRequestBodyAccess) Token() int {
 	return parser.TkDirReqBody
 }
 
-func (r *RuleRequestBodyAccess) FromSecLang(d parser.Directive) (Rule, error) {
+func (r *DireRequestBodyAccess) FromSecLang(d parser.Directive) (Dire, error) {
 	if d.Token() != r.Token() {
-		return nil, fmt.Errorf("RuleRequestBodyAccess expect directive with token %d, but %d", r.Token(), d.Token())
+		return nil, fmt.Errorf("DireRequestBodyAccess expect directive with token %d, but %d", r.Token(), d.Token())
 	}
 	dd, ok := d.(*parser.BoolArgDirective)
 	if !ok {
-		return nil, fmt.Errorf("RuleRequestBodyAccess can't accpet directive %#v", d)
+		return nil, fmt.Errorf("DireRequestBodyAccess can't accpet directive %#v", d)
 	}
-	return &RuleRequestBodyAccess{dd.Value}, nil
+	return &DireRequestBodyAccess{dd.Value}, nil
 }
 
-func (r *RuleRequestBodyAccess) Execute(e *modsecurity.Engine) error {
+func (r *DireRequestBodyAccess) Execute(e *modsecurity.Engine) error {
 	e.RequestBodyAccess = r.enable
 	return nil
 }
 
-// RuleResponseBodyAccess
-type RuleResponseBodyAccess struct {
+// DireResponseBodyAccess
+type DireResponseBodyAccess struct {
 	enable bool
 }
 
-func (*RuleResponseBodyAccess) Token() int {
+func (*DireResponseBodyAccess) Token() int {
 	return parser.TkDirResBody
 }
 
-func (r *RuleResponseBodyAccess) FromSecLang(d parser.Directive) (Rule, error) {
+func (r *DireResponseBodyAccess) FromSecLang(d parser.Directive) (Dire, error) {
 	if d.Token() != r.Token() {
-		return nil, fmt.Errorf("RuleResponseBodyAccess expect directive with token %d, but %d", r.Token(), d.Token())
+		return nil, fmt.Errorf("DireResponseBodyAccess expect directive with token %d, but %d", r.Token(), d.Token())
 	}
 	dd, ok := d.(*parser.BoolArgDirective)
 	if !ok {
-		return nil, fmt.Errorf("RuleResponseBodyAccess can't accpet directive %#v", d)
+		return nil, fmt.Errorf("DireResponseBodyAccess can't accpet directive %#v", d)
 	}
-	return &RuleResponseBodyAccess{dd.Value}, nil
+	return &DireResponseBodyAccess{dd.Value}, nil
 }
 
-func (r *RuleResponseBodyAccess) Execute(e *modsecurity.Engine) error {
+func (r *DireResponseBodyAccess) Execute(e *modsecurity.Engine) error {
 	e.ResponseBodyAccess = r.enable
 	return nil
 }
 
-// RuleSecRuleEngine
-type RuleSecRuleEngine struct {
+// DireRuleEngine
+type DireRuleEngine struct {
 	value int
 }
 
-func (*RuleSecRuleEngine) Token() int {
+func (*DireRuleEngine) Token() int {
 	return parser.TkDirRuleEng
 }
 
-func (r *RuleSecRuleEngine) FromSecLang(d parser.Directive) (Rule, error) {
+func (r *DireRuleEngine) FromSecLang(d parser.Directive) (Dire, error) {
 	if d.Token() != r.Token() {
-		return nil, fmt.Errorf("RuleResponseBodyAccess expect directive with token %d, but %d", r.Token(), d.Token())
+		return nil, fmt.Errorf("DireResponseBodyAccess expect directive with token %d, but %d", r.Token(), d.Token())
 	}
 	dd, ok := d.(*parser.TriBoolArgDirective)
 	if !ok {
-		return nil, fmt.Errorf("RuleResponseBodyAccess can't accpet directive %#v", d)
+		return nil, fmt.Errorf("DireResponseBodyAccess can't accpet directive %#v", d)
 	}
-	return &RuleSecRuleEngine{dd.Value}, nil
+	return &DireRuleEngine{dd.Value}, nil
 }
 
-func (r *RuleSecRuleEngine) Execute(e *modsecurity.Engine) error {
+func (r *DireRuleEngine) Execute(e *modsecurity.Engine) error {
 	switch r.value {
 	case parser.TriBoolTrue:
 		e.Enable(modsecurity.StatusOn)

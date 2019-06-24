@@ -8,25 +8,25 @@ import (
 )
 
 func init() {
-	RegisterSecLangRule(new(RuleSecRule))
+	RegisterSecLangDire(new(DireRule))
 }
 
-// RuleRequestBodyAccess
-type RuleSecRule struct {
+// DireRequestBodyAccess
+type DireRule struct {
 	rule *modsecurity.SecRule
 }
 
-func (*RuleSecRule) Token() int {
+func (*DireRule) Token() int {
 	return parser.TkDirRule
 }
 
-func (r *RuleSecRule) FromSecLang(d parser.Directive) (Rule, error) {
+func (r *DireRule) FromSecLang(d parser.Directive) (Dire, error) {
 	if d.Token() != r.Token() {
-		return nil, fmt.Errorf("RuleSecRule expect directive with token %d, but %d", r.Token(), d.Token())
+		return nil, fmt.Errorf("DireRule expect directive with token %d, but %d", r.Token(), d.Token())
 	}
 	dd, ok := d.(*parser.RuleDirective)
 	if !ok {
-		return nil, fmt.Errorf("RuleSecRule can't accpet directive %#v", d)
+		return nil, fmt.Errorf("DireRule can't accpet directive %#v", d)
 	}
 	variables, err := MakeVariables(dd.Variable)
 	if err != nil {
@@ -44,7 +44,7 @@ func (r *RuleSecRule) FromSecLang(d parser.Directive) (Rule, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &RuleSecRule{
+	return &DireRule{
 		&modsecurity.SecRule{
 			Id:        dd.Actions.Id,
 			Phase:     dd.Actions.Phase,
@@ -57,7 +57,7 @@ func (r *RuleSecRule) FromSecLang(d parser.Directive) (Rule, error) {
 	}, nil
 }
 
-func (r *RuleSecRule) Execute(e *modsecurity.Engine) error {
+func (r *DireRule) Execute(e *modsecurity.Engine) error {
 	e.AddSecRule(r.rule)
 	return nil
 }

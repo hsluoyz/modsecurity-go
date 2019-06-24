@@ -17,7 +17,7 @@ func ExampleRuleFromSeclang() {
                              deny"`
 
 	eng := modsecurity.NewEngine()
-	rs, err := seclang.NewRuleSetFromSecLangString(rule)
+	rs, err := seclang.NewDireSetFromSecLangString(rule)
 	if err != nil {
 		panic(err)
 	}

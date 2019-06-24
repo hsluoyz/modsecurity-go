@@ -14,7 +14,7 @@ func TestSecRule(t *testing.T) {
                              phase:2,\
                              t:lowercase,\
                              deny" `
-		rs, err := NewRuleSetFromSecLangString(input)
+		rs, err := NewDireSetFromSecLangString(input)
 		if err != nil {
 			t.Error(err)
 			return
