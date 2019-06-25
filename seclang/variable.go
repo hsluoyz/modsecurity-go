@@ -9,6 +9,7 @@ import (
 
 var variableFactorys map[int]VariableFactory = map[int]VariableFactory{
 	parser.TkVarRequestUri: variableNoArgErrWrapper(modsecurity.NewVariableRequestURI),
+	parser.TkVarArgsGet:    variableNoArgErrWrapper(modsecurity.NewVariableArgsGet),
 }
 
 func variableNoArgErrWrapper(f func() modsecurity.Variable) func(v *parser.Variable) (modsecurity.Variable, error) {
@@ -48,15 +49,17 @@ func MakeVariables(vs []*parser.Variable) ([]modsecurity.Variable, error) {
 				countVarMap[v.Tk] = modsecurity.NewCountVariable(variable)
 			}
 		}
-		if !v.Exclusion {
-			err := variable.Include(v.Index)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			err := variable.Exclude(v.Index)
-			if err != nil {
-				return nil, err
+		if v.Index != "" {
+			if !v.Exclusion {
+				err := variable.Include(v.Index)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				err := variable.Exclude(v.Index)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package seclang
 
 import (
+	"net/url"
 	"strings"
 	"testing"
 
@@ -61,4 +62,64 @@ func TestMakeVariables(t *testing.T) {
 		}
 
 	})
+	t.Run("ARGS_GET:a1", func(t *testing.T) {
+		rules := `
+SecRuleEngine On
+SecRule ARGS_GET \
+        '@rx v1' \
+        "id:123,\
+        phase:2,\
+        t:lowercase,\
+        deny"
+SecRule ARGS_GET:a2 \
+        '@rx v2' \
+        "id:123,\
+        phase:2,\
+        t:lowercase,\
+        deny"
+SecRule ARGS_GET:/^b/ \
+        '@rx v3' \
+        "id:123,\
+        phase:2,\
+        t:lowercase,\
+        deny"
+`
+		eng := modsecurity.NewEngine()
+		rs, err := NewDireSetFromSecLangString(rules)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		err = rs.Execute(eng)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		testDatas := map[string]int{
+			"/?query=v1": 403,
+			"/?query=v3": 200,
+			"/?a2=v2":    403,
+			"/?a2=ok":    200,
+			"/?a1=v2":    200,
+			"/?b1=v3":    403,
+			"/?b2=ok":    200,
+			"/?a1=v3":    200,
+		}
+		for data, status := range testDatas {
+			ts := eng.NewTransaction()
+			ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")
+			u, err := url.Parse(data)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			ts.ProcessRequestURL(u, "GET", "HTTP/1.1")
+			ts.ProcessRequestHeader(nil)
+			i := ts.Result()
+			if i.Status != status {
+				t.Errorf("url %s expect get %d but got %d, result %#v", data, status, i.Status, i)
+			}
+		}
+	})
+
 }

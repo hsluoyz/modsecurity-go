@@ -1,6 +1,8 @@
 package modsecurity
 
-import "github.com/sirupsen/logrus"
+import (
+	"github.com/sirupsen/logrus"
+)
 
 const (
 	PhaseBegin = iota
