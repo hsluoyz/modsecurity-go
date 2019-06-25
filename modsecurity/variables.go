@@ -60,6 +60,26 @@ func (v *VariableArgsGet) Fetch(t *Transaction) []string {
 	return v.filter.Fetch(t.URL.Query())
 }
 
+func NewVariableArgsGetNames() Variable {
+	return &VariableArgsGetNames{
+		filter: &filter{},
+	}
+}
+
+type VariableArgsGetNames struct {
+	*filter
+}
+
+func (*VariableArgsGetNames) Name() string {
+	return "ARGS_GET_NAMES"
+}
+func (v *VariableArgsGetNames) Fetch(t *Transaction) []string {
+	if t.URL == nil {
+		return nil
+	}
+	return v.filter.Names(t.URL.Query())
+}
+
 func NewCountVariable(v Variable) Variable {
 	return &CountVariable{v}
 }
@@ -116,6 +136,15 @@ func (f *filter) Fetch(vs map[string][]string) []string {
 	withName := f.FetchWithNames(vs)
 	for _, v := range withName {
 		res = append(res, v...)
+	}
+	return res
+}
+
+func (f *filter) Names(vs map[string][]string) []string {
+	var res []string
+	withName := f.FetchWithNames(vs)
+	for k, _ := range withName {
+		res = append(res, k)
 	}
 	return res
 }
