@@ -1,16 +1,32 @@
 package modsecurity
 
 type Engine struct {
-	Enabled            bool
-	DetectionOnly      bool
+	Enabled       bool
+	DetectionOnly bool
+	RuleSet       *SecRuleSet
+	*Limits
+}
+
+type Limits struct {
 	RequestBodyAccess  bool
 	ResponseBodyAccess bool
-	RuleSet            *SecRuleSet
+	RequestBody        int64
+	RequestBodyInMem   int64
+	ResponseBody       int64
+}
+
+func NewDefaultLimits() *Limits {
+	return &Limits{
+		RequestBodyInMem: 131072,    // 128kb
+		RequestBody:      134217728, // 1gb
+		ResponseBody:     524228,    // 512kb
+	}
 }
 
 func NewEngine() *Engine {
 	return &Engine{
 		RuleSet: NewSecRuleSet(),
+		Limits:  NewDefaultLimits(),
 	}
 }
 

@@ -9,29 +9,43 @@ import (
 )
 
 type Transaction struct {
-	RuleSet        *SecRuleSet
-	Engine         *Engine
-	Phase          int
-	SrcIp          string
-	SrcPort        string
-	DstIp          string
-	DstPort        string
-	URL            *url.URL
-	Method         string
-	RequestProto   string
-	RequestHeader  http.Header
-	RequestBody    *bytes.Buffer
-	ResponseCode   int
-	ResponseProto  string
-	ResponseHeader http.Header
-	ResponseBody   *bytes.Buffer
-	intervention   *Intervention
+	RuleSet *SecRuleSet
+	Engine  *Engine
+	Phase   int
+	*NetInfo
+	*Request
+	*Response
+	intervention *Intervention
+}
+
+type NetInfo struct {
+	SrcIp   string
+	SrcPort string
+	DstIp   string
+	DstPort string
+}
+type Request struct {
+	URL    *url.URL
+	Method string
+	Proto  string
+	Header http.Header
+	Body   *bytes.Buffer
+}
+
+type Response struct {
+	Code   int
+	Proto  string
+	Header http.Header
+	Body   *bytes.Buffer
 }
 
 func NewTransaction(e *Engine, rs *SecRuleSet) *Transaction {
 	return &Transaction{
-		RuleSet: rs,
-		Engine:  e,
+		RuleSet:  rs,
+		Engine:   e,
+		NetInfo:  &NetInfo{},
+		Request:  &Request{},
+		Response: &Response{},
 	}
 }
 
@@ -51,17 +65,17 @@ func (t *Transaction) ProcessConnection(srcIp, srcPort, dstIp, dstPort string) {
 func (t *Transaction) ProcessRequestURL(u *url.URL, method, proto string) {
 	t.URL = u
 	t.Method = method
-	t.RequestProto = proto
+	t.Request.Proto = proto
 }
 func (t *Transaction) ProcessRequestHeader(h http.Header) {
-	t.RequestHeader = h
+	t.Request.Header = h
 	t.ProcessPhase(PhaseRequestHeaders)
 }
 func (t *Transaction) AppendRequestBody(p []byte) error {
-	if t.RequestBody == nil {
-		t.RequestBody = bytes.NewBuffer(nil)
+	if t.Request.Body == nil {
+		t.Request.Body = bytes.NewBuffer(nil)
 	}
-	_, err := t.RequestBody.Write(p)
+	_, err := t.Request.Body.Write(p)
 	return err
 }
 
@@ -70,16 +84,16 @@ func (t *Transaction) ProcessRequestBody() {
 }
 
 func (t *Transaction) ProcessResponseHeaders(code int, proto string, header http.Header) {
-	t.ResponseCode = code
-	t.ResponseProto = proto
-	t.ResponseHeader = header
+	t.Response.Code = code
+	t.Response.Proto = proto
+	t.Response.Header = header
 	t.ProcessPhase(PhaseResponseHeaders)
 }
 func (t *Transaction) AppendResponseBody(p []byte) error {
-	if t.ResponseBody == nil {
-		t.ResponseBody = bytes.NewBuffer(nil)
+	if t.Response.Body == nil {
+		t.Response.Body = bytes.NewBuffer(nil)
 	}
-	_, err := t.ResponseBody.Write(p)
+	_, err := t.Response.Body.Write(p)
 	return err
 }
 

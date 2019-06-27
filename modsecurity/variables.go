@@ -80,6 +80,49 @@ func (v *VariableArgsGetNames) Fetch(t *Transaction) []string {
 	return v.filter.Names(t.URL.Query())
 }
 
+func NewVariableArgsPost() Variable {
+	return &VariableArgsPost{
+		filter: &filter{},
+	}
+}
+
+type VariableArgsPost struct {
+	*filter
+}
+
+func (*VariableArgsPost) Name() string {
+	return "ARGS_POST"
+}
+func (v *VariableArgsPost) Fetch(t *Transaction) []string {
+	if !t.Engine.RequestBodyAccess || t.Request.Body.Len() == 0 {
+		return nil
+	}
+	val, _ := url.ParseQuery(t.Request.Body.String())
+	return v.filter.Fetch(val)
+}
+
+func NewVariableArgsPostNames() Variable {
+	return &VariableArgsPostNames{
+		filter: &filter{},
+	}
+}
+
+type VariableArgsPostNames struct {
+	*filter
+}
+
+func (*VariableArgsPostNames) Name() string {
+	return "ARGS_POST_NAMES"
+}
+func (v *VariableArgsPostNames) Fetch(t *Transaction) []string {
+
+	if !t.Engine.RequestBodyAccess || t.Request.Body.Len() == 0 {
+		return nil
+	}
+	val, _ := url.ParseQuery(t.Request.Body.String())
+	return v.filter.Names(val)
+}
+
 func NewCountVariable(v Variable) Variable {
 	return &CountVariable{v}
 }
