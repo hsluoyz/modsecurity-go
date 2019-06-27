@@ -11,7 +11,11 @@ func TestVariableArgsGet(t *testing.T) {
 	v := NewVariableArgsGet()
 	v.Include(`/a/`)
 	u, _ := url.Parse("http://localhost/query?a1=1&a2=2&b1=3&b2=4")
-	tr := NewTransaction(nil, nil)
+	tr, err := NewTransaction(NewEngine(), NewSecRuleSet())
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	tr.ProcessRequestURL(u, "GET", "HTTP/1.1")
 	res := v.Fetch(tr)
 	if !utils.SameStringSlice(res, []string{"1", "2"}) {
@@ -24,7 +28,12 @@ func TestVariableArgsGetNames(t *testing.T) {
 		v := NewVariableArgsGetNames()
 		v.Include(`/a/`)
 		u, _ := url.Parse("http://localhost/query?a1=1&a2=2&b1=3&b2=4")
-		tr := NewTransaction(nil, nil)
+
+		tr, err := NewTransaction(NewEngine(), NewSecRuleSet())
+		if err != nil {
+			t.Error(err)
+			return
+		}
 		tr.ProcessRequestURL(u, "GET", "HTTP/1.1")
 		res := v.Fetch(tr)
 		if !utils.SameStringSlice(res, []string{"a1", "a2"}) {
@@ -35,7 +44,11 @@ func TestVariableArgsGetNames(t *testing.T) {
 		v := NewVariableArgsGetNames()
 		v.Exclude(`b1`)
 		u, _ := url.Parse("http://localhost/query?a1=1&a2=2&b1=3&b2=4")
-		tr := NewTransaction(nil, nil)
+		tr, err := NewTransaction(NewEngine(), NewSecRuleSet())
+		if err != nil {
+			t.Error(err)
+			return
+		}
 		tr.ProcessRequestURL(u, "GET", "HTTP/1.1")
 		res := v.Fetch(tr)
 		if !utils.SameStringSlice(res, []string{"a1", "a2", "b2"}) {
@@ -46,7 +59,11 @@ func TestVariableArgsGetNames(t *testing.T) {
 		v := NewVariableArgsGetNames()
 		v.Exclude(`/^a/`)
 		u, _ := url.Parse("http://localhost/query?a1=1&a2=2&b1=3&b2=4")
-		tr := NewTransaction(nil, nil)
+		tr, err := NewTransaction(NewEngine(), NewSecRuleSet())
+		if err != nil {
+			t.Error(err)
+			return
+		}
 		tr.ProcessRequestURL(u, "GET", "HTTP/1.1")
 		res := v.Fetch(tr)
 		if !utils.SameStringSlice(res, []string{"b1", "b2"}) {

@@ -26,7 +26,10 @@ func ExampleRuleFromSeclang() {
 		panic(err)
 	}
 
-	ts := eng.NewTransaction()
+	ts, err := eng.NewTransaction()
+	if err != nil {
+		panic(err)
+	}
 	ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")
 	u, err := url.Parse(`/search?="a';CMD echo '1"`)
 	if err != nil {

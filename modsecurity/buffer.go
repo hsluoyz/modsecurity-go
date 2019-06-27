@@ -9,15 +9,9 @@ import (
 )
 
 func newBuffer(dir string, memLimit, fileLimit int64) (*buffer, error) {
-	_, err := os.Stat(dir)
+	err := makeBufferDir(dir)
 	if err != nil {
-		if os.IsNotExist(err) {
-			if err := os.MkdirAll(dir, 0700); err != nil {
-				return nil, err
-			}
-		} else {
-			return nil, err
-		}
+		return nil, err
 	}
 	return &buffer{
 		dir:       dir,
@@ -125,6 +119,20 @@ func (b *buffer) Close() error {
 		return err
 	case err2 != nil:
 		return err2
+	}
+	return nil
+}
+
+func makeBufferDir(dir string) error {
+	_, err := os.Stat(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			if err := os.MkdirAll(dir, 0700); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
 	}
 	return nil
 }

@@ -63,6 +63,9 @@ func (r *SecRule) FetchAllTransformedVariables(t *Transaction) []string {
 
 func (r *SecRule) Match(t *Transaction) bool {
 	for _, v := range r.FetchAllTransformedVariables(t) {
+		if t.Abort {
+			return false
+		}
 		if r.Not != r.Operator.Match(v) {
 			return true
 		}
@@ -103,11 +106,18 @@ func (rs *SecRuleSet) AddRules(rules ...*SecRule) {
 }
 
 func (rs *SecRuleSet) ProcessPhase(t *Transaction, phase int) {
+	if t.Abort {
+		return
+	}
 	if rs.Phases == nil {
 		return
 	}
 	logrus.Debugf("running phase %d ", phase)
 	for _, rule := range rs.Phases[phase] {
 		rule.Do(t)
+		if t.Intervention().Disruptive {
+			logrus.Debug("skiping this phase, already intercepted")
+			break
+		}
 	}
 }

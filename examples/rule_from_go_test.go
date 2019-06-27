@@ -32,7 +32,10 @@ func ExampleRuleFromGo() {
 
 	// running rule
 	// make Transaction
-	ts := modsecurity.NewTransaction(e, ruleSet)
+	ts, err := modsecurity.NewTransaction(e, ruleSet)
+	if err != nil {
+		panic(err)
+	}
 
 	// request header phase
 	ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")

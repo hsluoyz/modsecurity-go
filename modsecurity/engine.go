@@ -5,6 +5,7 @@ type Engine struct {
 	DetectionOnly bool
 	RuleSet       *SecRuleSet
 	*Limits
+	*Config
 }
 
 type Limits struct {
@@ -13,6 +14,15 @@ type Limits struct {
 	RequestBody        int64
 	RequestBodyInMem   int64
 	ResponseBody       int64
+}
+type Config struct {
+	TmpPath string
+}
+
+func NewDefaultConfig() *Config {
+	return &Config{
+		TmpPath: "/tmp",
+	}
 }
 
 func NewDefaultLimits() *Limits {
@@ -27,6 +37,7 @@ func NewEngine() *Engine {
 	return &Engine{
 		RuleSet: NewSecRuleSet(),
 		Limits:  NewDefaultLimits(),
+		Config:  NewDefaultConfig(),
 	}
 }
 
@@ -54,6 +65,6 @@ func (e *Engine) Enable(status int) {
 func (e *Engine) AddSecRule(rules ...*SecRule) {
 	e.RuleSet.AddRules(rules...)
 }
-func (e *Engine) NewTransaction() *Transaction {
+func (e *Engine) NewTransaction() (*Transaction, error) {
 	return NewTransaction(e, e.RuleSet)
 }

@@ -2,6 +2,7 @@ package modsecurity
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -12,6 +13,7 @@ type Transaction struct {
 	RuleSet *SecRuleSet
 	Engine  *Engine
 	Phase   int
+	Abort   bool
 	*NetInfo
 	*Request
 	*Response
@@ -29,24 +31,38 @@ type Request struct {
 	Method string
 	Proto  string
 	Header http.Header
-	Body   *bytes.Buffer
+	Body   *buffer
 }
 
 type Response struct {
 	Code   int
 	Proto  string
 	Header http.Header
-	Body   *bytes.Buffer
+	Body   *buffer
 }
 
-func NewTransaction(e *Engine, rs *SecRuleSet) *Transaction {
+func NewTransaction(e *Engine, rs *SecRuleSet) (*Transaction, error) {
+	if e == nil {
+		return nil, errors.New("no engine")
+	}
+	if rs == nil {
+		return nil, errors.New("no rule set")
+	}
+	reqBody, err := newBuffer(e.TmpPath, e.RequestBodyInMem, e.RequestBody)
+	if err != nil {
+		return nil, err
+	}
+	resBody, err := newBuffer(e.TmpPath, e.ResponseBody, e.ResponseBody)
+	if err != nil {
+		return nil, err
+	}
 	return &Transaction{
 		RuleSet:  rs,
 		Engine:   e,
 		NetInfo:  &NetInfo{},
-		Request:  &Request{},
-		Response: &Response{},
-	}
+		Request:  &Request{Body: reqBody},
+		Response: &Response{Body: resBody},
+	}, nil
 }
 
 func (t *Transaction) ProcessPhase(phase int) {
@@ -68,13 +84,13 @@ func (t *Transaction) ProcessRequestURL(u *url.URL, method, proto string) {
 	t.Request.Proto = proto
 }
 func (t *Transaction) ProcessRequestHeader(h http.Header) {
+	if h == nil {
+		h = make(http.Header)
+	}
 	t.Request.Header = h
 	t.ProcessPhase(PhaseRequestHeaders)
 }
 func (t *Transaction) AppendRequestBody(p []byte) error {
-	if t.Request.Body == nil {
-		t.Request.Body = bytes.NewBuffer(nil)
-	}
 	_, err := t.Request.Body.Write(p)
 	return err
 }
@@ -84,15 +100,15 @@ func (t *Transaction) ProcessRequestBody() {
 }
 
 func (t *Transaction) ProcessResponseHeaders(code int, proto string, header http.Header) {
+	if header == nil {
+		header = make(http.Header)
+	}
 	t.Response.Code = code
 	t.Response.Proto = proto
 	t.Response.Header = header
 	t.ProcessPhase(PhaseResponseHeaders)
 }
 func (t *Transaction) AppendResponseBody(p []byte) error {
-	if t.Response.Body == nil {
-		t.Response.Body = bytes.NewBuffer(nil)
-	}
 	_, err := t.Response.Body.Write(p)
 	return err
 }
@@ -112,9 +128,24 @@ func (t *Transaction) Intervention() *Intervention {
 	}
 	return t.intervention
 }
+
+func (t *Transaction) AbortWithError(code int, err error) {
+	i := t.Intervention()
+	i.Status = code
+	i.Disruptive = true
+	t.Logf("abort process with error %s", err.Error())
+}
+
+func (t *Transaction) AbortWithStatus(code int) {
+	i := t.Intervention()
+	i.Status = code
+	i.Disruptive = true
+}
 func (t *Transaction) Result() *Intervention {
 	i := t.Intervention().Copy()
-	t.Intervention().Reset()
+	if !t.Abort {
+		t.Intervention().Reset()
+	}
 	return i
 }
 

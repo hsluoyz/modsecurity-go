@@ -1,6 +1,8 @@
 package modsecurity
 
 import (
+	"mime"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -86,6 +88,32 @@ func NewVariableArgsPost() Variable {
 	}
 }
 
+func argsPost(t *Transaction) map[string][]string {
+	if t.Request.Method == "POST" || t.Request.Method == "PUT" || t.Request.Method == "PATCH" {
+		return nil
+	}
+	if !t.Engine.RequestBodyAccess || t.Request.Body.Len() == 0 {
+		return nil
+	}
+	ct := t.Request.Header.Get("Content-Type")
+	if ct == "" {
+		ct = "application/octet-stream"
+	}
+	ct, _, _ = mime.ParseMediaType(ct)
+	switch {
+	case ct == "application/x-www-form-urlencoded":
+		body, err := t.Request.Body.String()
+		if err != nil {
+			t.AbortWithError(http.StatusRequestEntityTooLarge, err)
+		}
+		val, _ := url.ParseQuery(body)
+		return val
+	case ct == "multipart/form-data":
+		// TODO: Add multipart result
+	}
+	return nil
+}
+
 type VariableArgsPost struct {
 	*filter
 }
@@ -94,11 +122,7 @@ func (*VariableArgsPost) Name() string {
 	return "ARGS_POST"
 }
 func (v *VariableArgsPost) Fetch(t *Transaction) []string {
-	if !t.Engine.RequestBodyAccess || t.Request.Body.Len() == 0 {
-		return nil
-	}
-	val, _ := url.ParseQuery(t.Request.Body.String())
-	return v.filter.Fetch(val)
+	return v.filter.Fetch(argsPost(t))
 }
 
 func NewVariableArgsPostNames() Variable {
@@ -115,12 +139,7 @@ func (*VariableArgsPostNames) Name() string {
 	return "ARGS_POST_NAMES"
 }
 func (v *VariableArgsPostNames) Fetch(t *Transaction) []string {
-
-	if !t.Engine.RequestBodyAccess || t.Request.Body.Len() == 0 {
-		return nil
-	}
-	val, _ := url.ParseQuery(t.Request.Body.String())
-	return v.filter.Names(val)
+	return v.filter.Names(argsPost(t))
 }
 
 func NewCountVariable(v Variable) Variable {

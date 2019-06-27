@@ -31,7 +31,11 @@ func TestRuleSet(t *testing.T) {
 	}
 
 	t.Run("deny", func(t *testing.T) {
-		ts := eng.NewTransaction()
+		ts, err := eng.NewTransaction()
+		if err != nil {
+			t.Error(err)
+			return
+		}
 		ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")
 		u, err := url.Parse(`/search?="a';CMD echo '1"`)
 		if err != nil {
@@ -58,7 +62,11 @@ func TestRuleSet(t *testing.T) {
 	})
 
 	t.Run("allow", func(t *testing.T) {
-		ts := eng.NewTransaction()
+		ts, err := eng.NewTransaction()
+		if err != nil {
+			t.Error(err)
+			return
+		}
 		ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")
 		u, err := url.Parse(`/search?="a1"`)
 		if err != nil {

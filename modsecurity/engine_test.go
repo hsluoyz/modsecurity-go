@@ -28,7 +28,11 @@ func TestEngine(t *testing.T) {
 		rule.SetOperator(op)
 		rule.AppendActions(NewActionDeny())
 		ruleSet.AddRules(rule)
-		ts := NewTransaction(e, ruleSet)
+		ts, err := NewTransaction(e, ruleSet)
+		if err != nil {
+			t.Error(err)
+			return
+		}
 		ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")
 		u, err := url.Parse(`/search?="a';select '1"`)
 		if err != nil {

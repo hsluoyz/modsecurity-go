@@ -48,7 +48,7 @@ if err != nil {
 	panic(err)
 }
 
-ts := eng.NewTransaction()
+ts, _ := eng.NewTransaction()
 ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")
 u, err := url.Parse(`/search?="a';CMD echo '1"`)
 if err != nil {
@@ -98,7 +98,7 @@ ruleSet.AddRules(rule)
 
 // running rule
 // make Transaction
-ts := modsecurity.NewTransaction(e, ruleSet)
+ts, _ := modsecurity.NewTransaction(e, ruleSet)
 
 // request header phase
 ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")

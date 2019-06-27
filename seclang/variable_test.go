@@ -106,7 +106,11 @@ SecRule ARGS_GET:/^b/ \
 			"/?a1=v3":    200,
 		}
 		for data, status := range testDatas {
-			ts := eng.NewTransaction()
+			ts, err := eng.NewTransaction()
+			if err != nil {
+				t.Error(err)
+				return
+			}
 			ts.ProcessConnection("127.0.0.1", "12345", "127.0.0.1", "80")
 			u, err := url.Parse(data)
 			if err != nil {
