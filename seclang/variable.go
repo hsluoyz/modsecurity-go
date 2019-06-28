@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/modsecurity/variables"
 	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
 var variableFactorys map[int]VariableFactory = map[int]VariableFactory{
-	parser.TkVarRequestUri: variableNoArgErrWrapper(modsecurity.NewVariableRequestURI),
-	parser.TkVarArgsGet:    variableNoArgErrWrapper(modsecurity.NewVariableArgsGet),
+	parser.TkVarRequestUri: variableNoArgErrWrapper(variables.NewVariableRequestURI),
+	parser.TkVarArgsGet:    variableNoArgErrWrapper(variables.NewVariableArgsGet),
 }
 
 func variableNoArgErrWrapper(f func() modsecurity.Variable) func(v *parser.Variable) (modsecurity.Variable, error) {
@@ -46,7 +47,7 @@ func MakeVariables(vs []*parser.Variable) ([]modsecurity.Variable, error) {
 				if variable, err = factory(v); err != nil {
 					return nil, err
 				}
-				countVarMap[v.Tk] = modsecurity.NewCountVariable(variable)
+				countVarMap[v.Tk] = variables.NewCountVariable(variable)
 			}
 		}
 		if v.Index != "" {

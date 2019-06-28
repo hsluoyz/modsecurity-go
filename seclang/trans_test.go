@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/modsecurity/transforms"
 	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
@@ -26,7 +26,7 @@ func TestMakeTrans(t *testing.T) {
 			t.Error("expect one trans")
 			return
 		}
-		if v, ok := trans[0].(*modsecurity.TransLowerCase); !ok {
+		if v, ok := trans[0].(*transforms.TransLowerCase); !ok {
 			t.Errorf("except TransLowerCase got %#v", v)
 			return
 		}

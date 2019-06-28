@@ -1,14 +1,12 @@
-package modsecurity
+package operators
 
-import "regexp"
+import (
+	"regexp"
 
-type Operator interface {
-	Name() string
-	Args() string
-	Match(string) bool
-}
+	"github.com/senghoo/modsecurity-go/modsecurity"
+)
 
-func NewOperatorRx(re string) (Operator, error) {
+func NewOperatorRx(re string) (modsecurity.Operator, error) {
 	match, err := regexp.Compile(re)
 	if err != nil {
 		return nil, err

@@ -121,3 +121,27 @@ func (rs *SecRuleSet) ProcessPhase(t *Transaction, phase int) {
 		}
 	}
 }
+
+type Variable interface {
+	Name() string
+	Include(string) error
+	Exclude(string) error
+	Fetch(*Transaction) []string
+}
+
+type Trans interface {
+	Name() string
+	Trans(string) string
+}
+
+type Operator interface {
+	Name() string
+	Args() string
+	Match(string) bool
+}
+
+type Action interface {
+	Name() string
+	Value() string
+	Do(*Transaction)
+}

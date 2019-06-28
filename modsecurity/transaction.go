@@ -17,7 +17,8 @@ type Transaction struct {
 	*NetInfo
 	*Request
 	*Response
-	intervention *Intervention
+	VariableCache map[string]interface{}
+	intervention  *Intervention
 }
 
 type NetInfo struct {
@@ -57,11 +58,12 @@ func NewTransaction(e *Engine, rs *SecRuleSet) (*Transaction, error) {
 		return nil, err
 	}
 	return &Transaction{
-		RuleSet:  rs,
-		Engine:   e,
-		NetInfo:  &NetInfo{},
-		Request:  &Request{Body: reqBody},
-		Response: &Response{Body: resBody},
+		RuleSet:       rs,
+		Engine:        e,
+		NetInfo:       &NetInfo{},
+		Request:       &Request{Body: reqBody},
+		Response:      &Response{Body: resBody},
+		VariableCache: make(map[string]interface{}),
 	}, nil
 }
 

@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/modsecurity/transforms"
 	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
 var transFactorys map[int]TransFactory = map[int]TransFactory{
-	parser.TkTransLowercase: transNoArgErrWrapper(modsecurity.NewTransLowerCase),
+	parser.TkTransLowercase: transNoArgErrWrapper(transforms.NewTransLowerCase),
 }
 
 func transNoArgErrWrapper(f func() modsecurity.Trans) func(v *parser.Trans) (modsecurity.Trans, error) {

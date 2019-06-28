@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/modsecurity/actions"
 	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
 var actionFactorys map[int]ActionFactory = map[int]ActionFactory{
-	parser.TkActionDeny: actionNoArgErrWrapper(modsecurity.NewActionDeny),
+	parser.TkActionDeny: actionNoArgErrWrapper(actions.NewActionDeny),
 }
 
 func actionNoArgErrWrapper(f func() modsecurity.Action) func(v *parser.Action) (modsecurity.Action, error) {

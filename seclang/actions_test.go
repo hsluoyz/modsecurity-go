@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/modsecurity/actions"
 	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
@@ -17,16 +17,16 @@ func TestMakeActions(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		actions, err := MakeActions(parsed.Action)
+		a, err := MakeActions(parsed.Action)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		if len(actions) != 1 {
+		if len(a) != 1 {
 			t.Error("expect one variable")
 			return
 		}
-		if v, ok := actions[0].(*modsecurity.ActionDeny); !ok {
+		if v, ok := a[0].(*actions.ActionDeny); !ok {
 			t.Errorf("except ActionDeny got %#v", v)
 			return
 		}

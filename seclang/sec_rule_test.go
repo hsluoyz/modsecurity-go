@@ -4,6 +4,10 @@ import (
 	"testing"
 
 	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/modsecurity/actions"
+	"github.com/senghoo/modsecurity-go/modsecurity/operators"
+	"github.com/senghoo/modsecurity-go/modsecurity/transforms"
+	"github.com/senghoo/modsecurity-go/modsecurity/variables"
 )
 
 func TestSecRule(t *testing.T) {
@@ -41,7 +45,7 @@ func TestSecRule(t *testing.T) {
 			t.Error("expect one variables")
 			return
 		}
-		if _, ok := rule.Variables[0].(*modsecurity.VariableRequestURI); !ok {
+		if _, ok := rule.Variables[0].(*variables.VariableRequestURI); !ok {
 			t.Errorf("expect VariableRequestURI, got %#v", rule.Variables[0])
 			return
 		}
@@ -50,12 +54,12 @@ func TestSecRule(t *testing.T) {
 			t.Error("expect one trans")
 			return
 		}
-		if _, ok := rule.Trans[0].(*modsecurity.TransLowerCase); !ok {
+		if _, ok := rule.Trans[0].(*transforms.TransLowerCase); !ok {
 			t.Errorf("expect TranLowerCase, got %#v", rule.Trans[0])
 			return
 		}
 
-		op, ok := rule.Operator.(*modsecurity.OperatorRx)
+		op, ok := rule.Operator.(*operators.OperatorRx)
 		if !ok {
 			t.Errorf("expect OperatorRx, got %#v", rule.Operator)
 			return
@@ -69,7 +73,7 @@ func TestSecRule(t *testing.T) {
 			t.Error("expect one actions")
 			return
 		}
-		if _, ok := rule.Actions[0].(*modsecurity.ActionDeny); !ok {
+		if _, ok := rule.Actions[0].(*actions.ActionDeny); !ok {
 			t.Errorf("expect ActionDeny, got %#v", rule.Actions[0])
 			return
 		}

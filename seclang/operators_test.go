@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/modsecurity/operators"
 	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
@@ -26,7 +26,7 @@ func TestMakeOperator(t *testing.T) {
 			t.Error("not get operator")
 			return
 		}
-		rx, ok := operator.(*modsecurity.OperatorRx)
+		rx, ok := operator.(*operators.OperatorRx)
 		if !ok {
 			t.Errorf("except VariableRequestURI got %#v", rx)
 			return
@@ -55,7 +55,7 @@ func TestMakeOperator(t *testing.T) {
 			t.Error("not get operator")
 			return
 		}
-		rx, ok := operator.(*modsecurity.OperatorRx)
+		rx, ok := operator.(*operators.OperatorRx)
 		if !ok {
 			t.Errorf("except VariableRequestURI got %#v", rx)
 			return

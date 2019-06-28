@@ -5,6 +5,9 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/modsecurity/actions"
+	"github.com/senghoo/modsecurity-go/modsecurity/operators"
+	"github.com/senghoo/modsecurity-go/modsecurity/variables"
 )
 
 func ExampleRuleFromGo() {
@@ -19,15 +22,15 @@ func ExampleRuleFromGo() {
 		Phase: modsecurity.PhaseRequestHeaders,
 	}
 	// Variable: REQUEST_URI
-	rule.AppendVariables(modsecurity.NewVariableRequestURI())
+	rule.AppendVariables(variables.NewVariableRequestURI())
 	// Operation: rx select
-	op, err := modsecurity.NewOperatorRx("select")
+	op, err := operators.NewOperatorRx("select")
 	if err != nil {
 		panic(err)
 	}
 	rule.SetOperator(op)
 	// Action: deny
-	rule.AppendActions(modsecurity.NewActionDeny())
+	rule.AppendActions(actions.NewActionDeny())
 	ruleSet.AddRules(rule)
 
 	// running rule

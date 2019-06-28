@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/senghoo/modsecurity-go/modsecurity/variables"
 	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
@@ -18,16 +19,16 @@ func TestMakeVariables(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		variables, err := MakeVariables(vs)
+		vars, err := MakeVariables(vs)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		if len(variables) != 1 {
+		if len(vars) != 1 {
 			t.Error("expect one variable")
 			return
 		}
-		if v, ok := variables[0].(*modsecurity.VariableRequestURI); !ok {
+		if v, ok := vars[0].(*variables.VariableRequestURI); !ok {
 			t.Errorf("except VariableRequestURI got %#v", v)
 			return
 		}
@@ -42,21 +43,21 @@ func TestMakeVariables(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		variables, err := MakeVariables(vs)
+		vars, err := MakeVariables(vs)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		if len(variables) != 1 {
+		if len(vars) != 1 {
 			t.Error("expect one variable")
 			return
 		}
-		countV, ok := variables[0].(*modsecurity.CountVariable)
+		countV, ok := vars[0].(*variables.CountVariable)
 		if !ok {
 			t.Errorf("except CountVariable got %#v", countV)
 			return
 		}
-		if v, ok := countV.Variable.(*modsecurity.VariableRequestURI); !ok {
+		if v, ok := countV.Variable.(*variables.VariableRequestURI); !ok {
 			t.Errorf("except VariableRequestURI got %#v", v)
 			return
 		}

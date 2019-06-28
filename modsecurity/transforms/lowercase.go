@@ -1,15 +1,14 @@
-package modsecurity
+package transforms
 
-import "strings"
+import (
+	"strings"
 
-type Trans interface {
-	Name() string
-	Trans(string) string
-}
+	"github.com/senghoo/modsecurity-go/modsecurity"
+)
 
 type TransLowerCase struct{}
 
-func NewTransLowerCase() Trans {
+func NewTransLowerCase() modsecurity.Trans {
 	return &TransLowerCase{}
 }
 
