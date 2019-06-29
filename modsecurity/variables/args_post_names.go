@@ -2,6 +2,7 @@ package variables
 
 import (
 	"mime/multipart"
+	"net/url"
 
 	"github.com/senghoo/modsecurity-go/modsecurity"
 )
@@ -22,7 +23,7 @@ func (*VariableArgsPostNames) Name() string {
 func (v *VariableArgsPostNames) Fetch(t *modsecurity.Transaction) []string {
 	switch tp, parsed := requestBodyParse(t, bodyTypeUrlencoded, bodyTypeMultipart); tp {
 	case bodyTypeUrlencoded:
-		content, ok := parsed.(map[string][]string)
+		content, ok := parsed.(url.Values)
 		if !ok {
 			return nil
 		}

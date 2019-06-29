@@ -9,9 +9,9 @@ import (
 	"github.com/senghoo/modsecurity-go/utils"
 )
 
-func TestVariableArgsPost(t *testing.T) {
-	v := NewVariableArgsPost()
-	if v.Name() != "ARGS_POST" {
+func TestVariableArgsPostNames(t *testing.T) {
+	v := NewVariableArgsPostNames()
+	if v.Name() != "ARGS_POST_NAMES" {
 		t.Errorf("got unexcepted variable name %s", v.Name())
 		return
 	}
@@ -32,7 +32,7 @@ func TestVariableArgsPost(t *testing.T) {
 		tr.ProcessRequestHeader(header)
 		tr.AppendRequestBody([]byte(body))
 		res := v.Fetch(tr)
-		if !utils.SameStringSlice(res, []string{"1", "2", "3", "4"}) {
+		if !utils.SameStringSlice(res, []string{"a1", "a2", "b1", "b2"}) {
 			t.Errorf("variable args get fail got %q", res)
 		}
 	})
@@ -53,7 +53,7 @@ func TestVariableArgsPost(t *testing.T) {
 		tr.ProcessRequestHeader(header)
 		tr.AppendRequestBody([]byte(body))
 		res := v.Fetch(tr)
-		if !utils.SameStringSlice(res, []string{"A section", "Another section"}) {
+		if !utils.SameStringSlice(res, []string{"text", "test2"}) {
 			t.Errorf("variable args get fail got %q", res)
 		}
 	})

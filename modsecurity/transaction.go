@@ -137,6 +137,7 @@ func (t *Transaction) Intervention() *Intervention {
 }
 
 func (t *Transaction) AbortWithError(code int, err error) {
+	t.Abort = true
 	i := t.Intervention()
 	i.Status = code
 	i.Disruptive = true
@@ -144,6 +145,7 @@ func (t *Transaction) AbortWithError(code int, err error) {
 }
 
 func (t *Transaction) AbortWithStatus(code int) {
+	t.Abort = true
 	i := t.Intervention()
 	i.Status = code
 	i.Disruptive = true

@@ -19,13 +19,23 @@ func isRegex(str string) bool {
 	}
 	return str[0] == '/' && str[len(str)-1] == '/'
 }
+func compileRegex(str string) (*regexp.Regexp, error) {
+	if !isRegex(str) {
+		return nil, nil
+	}
+	re, err := regexp.Compile(str[1 : len(str)-1])
+	if err != nil {
+		return nil, err
+	}
+	return re, nil
+}
 
 func (f *filter) Include(s string) error {
-	if isRegex(s) {
-		re, err := regexp.Compile(s[1 : len(s)-1])
-		if err != nil {
-			return err
-		}
+	re, err := compileRegex(s)
+	if err != nil {
+		return err
+	}
+	if re != nil {
 		f.includeRegex = append(f.includeRegex, re)
 		return nil
 	}
@@ -33,11 +43,11 @@ func (f *filter) Include(s string) error {
 	return nil
 }
 func (f *filter) Exclude(s string) error {
-	if isRegex(s) {
-		re, err := regexp.Compile(s[1 : len(s)-1])
-		if err != nil {
-			return err
-		}
+	re, err := compileRegex(s)
+	if err != nil {
+		return err
+	}
+	if re != nil {
 		f.excludeRegex = append(f.excludeRegex, re)
 		return nil
 	}

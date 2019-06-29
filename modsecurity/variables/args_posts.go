@@ -24,13 +24,13 @@ func (v *VariableArgsPost) Fetch(t *modsecurity.Transaction) []string {
 	switch tp, parsed := requestBodyParse(t, bodyTypeUrlencoded, bodyTypeMultipart); tp {
 	case bodyTypeUrlencoded:
 		content, ok := parsed.(url.Values)
-		if !ok {
+		if content == nil || !ok {
 			return nil
 		}
 		return v.filter.Fetch(content)
 	case bodyTypeMultipart:
 		content, ok := parsed.(*multipart.Form)
-		if !ok {
+		if content == nil || !ok {
 			return nil
 		}
 		return v.filter.Fetch(content.Value)

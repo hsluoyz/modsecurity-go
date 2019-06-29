@@ -6,6 +6,47 @@ import (
 	"github.com/senghoo/modsecurity-go/utils"
 )
 
+func TestIsRegex(t *testing.T) {
+	var input = map[string]bool{
+		"abc":   false,
+		"/abc":  false,
+		"abc/":  false,
+		"/abc/": true,
+		"/":     false,
+		"//":    true,
+	}
+	for k, v := range input {
+		if isRegex(k) != v {
+			t.Errorf("input %s got result %t", k, !v)
+		}
+	}
+}
+
+func TestCompileRegex(t *testing.T) {
+	var input = map[string]bool{
+		"abc":   false,
+		"/abc":  false,
+		"abc/":  false,
+		"/abc/": true,
+		"/":     false,
+		"//":    true,
+	}
+	for k, v := range input {
+		re, err := compileRegex(k)
+		if err != nil {
+			t.Error(err)
+		}
+		if (re != nil) != v {
+			t.Errorf("input %s got result %t", k, !v)
+		}
+	}
+	// expect error
+	_, err := compileRegex("/(((/")
+	if err == nil {
+		t.Error("expect error but not")
+	}
+}
+
 func TestFilter(t *testing.T) {
 	var input = map[string][]string{
 		"a1": []string{"1"},

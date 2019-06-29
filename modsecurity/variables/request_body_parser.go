@@ -29,6 +29,7 @@ var parsers = map[int]*bodyParser{
 			body, err := t.Request.Body.String()
 			if err != nil {
 				t.AbortWithError(http.StatusRequestEntityTooLarge, err)
+				return nil, err
 			}
 			return url.ParseQuery(body)
 		},
@@ -40,6 +41,7 @@ var parsers = map[int]*bodyParser{
 			form, err := mr.ReadForm(t.Engine.RequestBodyInMem)
 			if err == multipart.ErrMessageTooLarge {
 				t.AbortWithError(http.StatusRequestEntityTooLarge, err)
+				return nil, err
 			}
 			return form, err
 		},
@@ -74,6 +76,7 @@ func requestBodyParse(t *modsecurity.Transaction, types ...int) (int, interface{
 			t.VariableCache[cacheKey] = res
 			if err != nil {
 				t.RequestBodyError = err
+				break
 			}
 		}
 		if res != nil {
