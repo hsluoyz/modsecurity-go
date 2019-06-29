@@ -10,7 +10,15 @@ import (
 
 func TestVariableArgsGet(t *testing.T) {
 	v := NewVariableArgsGet()
+	if v.Name() != "ARGS_GET" {
+		t.Errorf("got unexcepted variable name %s", v.Name())
+		return
+	}
 	v.Include(`/a/`)
+	vars := v.Fetch(nil)
+	if vars != nil {
+		t.Errorf("got unexcepted variable %#v ", vars)
+	}
 	u, _ := url.Parse("http://localhost/query?a1=1&a2=2&b1=3&b2=4")
 	tr, err := modsecurity.NewTransaction(modsecurity.NewEngine(), modsecurity.NewSecRuleSet())
 	if err != nil {

@@ -16,7 +16,7 @@ func (*VariableArgsGet) Name() string {
 	return "ARGS_GET"
 }
 func (v *VariableArgsGet) Fetch(t *modsecurity.Transaction) []string {
-	if t.URL == nil {
+	if t == nil || t.URL == nil {
 		return nil
 	}
 	return v.filter.Fetch(t.URL.Query())

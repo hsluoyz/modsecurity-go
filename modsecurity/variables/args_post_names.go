@@ -1,6 +1,8 @@
 package variables
 
 import (
+	"mime/multipart"
+
 	"github.com/senghoo/modsecurity-go/modsecurity"
 )
 
@@ -18,5 +20,19 @@ func (*VariableArgsPostNames) Name() string {
 	return "ARGS_POST_NAMES"
 }
 func (v *VariableArgsPostNames) Fetch(t *modsecurity.Transaction) []string {
-	return v.filter.Names(argsPost(t))
+	switch tp, parsed := requestBodyParse(t, bodyTypeUrlencoded, bodyTypeMultipart); tp {
+	case bodyTypeUrlencoded:
+		content, ok := parsed.(map[string][]string)
+		if !ok {
+			return nil
+		}
+		return v.filter.Names(content)
+	case bodyTypeMultipart:
+		content, ok := parsed.(*multipart.Form)
+		if !ok {
+			return nil
+		}
+		return v.filter.Names(content.Value)
+	}
+	return nil
 }

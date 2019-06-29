@@ -9,6 +9,15 @@ import (
 )
 
 func TestVariableArgsGetNames(t *testing.T) {
+	v := NewVariableArgsGetNames()
+	if v.Name() != "ARGS_GET_NAMES" {
+		t.Errorf("got unexcepted variable name %s", v.Name())
+		return
+	}
+	vars := v.Fetch(nil)
+	if vars != nil {
+		t.Errorf("got unexcepted variable %#v ", vars)
+	}
 	t.Run("regex name", func(t *testing.T) {
 		v := NewVariableArgsGetNames()
 		v.Include(`/a/`)

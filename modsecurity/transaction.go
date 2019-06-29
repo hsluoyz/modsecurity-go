@@ -17,6 +17,7 @@ type Transaction struct {
 	*NetInfo
 	*Request
 	*Response
+	*Errors
 	VariableCache map[string]interface{}
 	intervention  *Intervention
 }
@@ -41,6 +42,9 @@ type Response struct {
 	Header http.Header
 	Body   *buffer
 }
+type Errors struct {
+	RequestBodyError error
+}
 
 func NewTransaction(e *Engine, rs *SecRuleSet) (*Transaction, error) {
 	if e == nil {
@@ -63,6 +67,7 @@ func NewTransaction(e *Engine, rs *SecRuleSet) (*Transaction, error) {
 		NetInfo:       &NetInfo{},
 		Request:       &Request{Body: reqBody},
 		Response:      &Response{Body: resBody},
+		Errors:        &Errors{},
 		VariableCache: make(map[string]interface{}),
 	}, nil
 }
