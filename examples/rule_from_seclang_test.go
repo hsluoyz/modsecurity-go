@@ -45,7 +45,7 @@ func ExampleRuleFromSeclang() {
 	//  Pause: (time.Duration) 0s,
 	//  Url: (*url.URL)(<nil>),
 	//  Log: ([]string) (len=1 cap=1) {
-	//   (string) (len=73) "[client 127.0.0.1:12345](phase 2)ModSecurity: Access denied with code 403"
+	//   (string) (len=75) "[client 127.0.0.1:12345] (phase 2) ModSecurity: Access denied with code 403"
 	//  },
 	//  Disruptive: (bool) true
 	// })

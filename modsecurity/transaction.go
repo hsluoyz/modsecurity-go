@@ -150,6 +150,7 @@ func (t *Transaction) AbortWithStatus(code int) {
 	i.Status = code
 	i.Disruptive = true
 }
+
 func (t *Transaction) Result() *Intervention {
 	i := t.Intervention().Copy()
 	if !t.Abort {
@@ -160,7 +161,7 @@ func (t *Transaction) Result() *Intervention {
 
 func (t *Transaction) Logf(f string, val ...interface{}) {
 	buffer := bytes.NewBuffer(nil)
-	fmt.Fprintf(buffer, "[client %s:%s](phase %d)", t.SrcIp, t.SrcPort, t.Phase)
+	fmt.Fprintf(buffer, "[client %s:%s] (phase %d) ", t.SrcIp, t.SrcPort, t.Phase)
 	fmt.Fprintf(buffer, f, val...)
 	i := t.Intervention()
 	i.Log = append(i.Log, buffer.String())

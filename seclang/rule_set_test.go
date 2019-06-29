@@ -48,7 +48,7 @@ func TestRuleSet(t *testing.T) {
 		expect := &modsecurity.Intervention{
 			Status: 403,
 			Log: []string{
-				"[client 127.0.0.1:12345](phase 2)ModSecurity: Access denied with code 403",
+				"[client 127.0.0.1:12345] (phase 2) ModSecurity: Access denied with code 403",
 			},
 			Disruptive: true,
 		}
