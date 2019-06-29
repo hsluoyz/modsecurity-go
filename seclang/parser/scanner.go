@@ -241,6 +241,82 @@ func (s *Scanner) ReadOperator() (*Operator, error) {
 	return res, nil
 }
 
+var actionProcessors = map[int]func(*Actions, string) error{
+	0: func(a *Actions, arg string) error {
+		return errors.New("unexpected action type")
+	},
+	TkActionId: func(a *Actions, arg string) (err error) {
+		arg = trimQuote(arg)
+		a.Id, err = strconv.Atoi(arg)
+		if err != nil {
+			return fmt.Errorf("cannot parse id %s, err: %s", arg, err.Error())
+		}
+		return
+	},
+	TkActionSeverity: func(a *Actions, arg string) (err error) {
+		arg = trimQuote(arg)
+		if severity, has := severityMap[arg]; has {
+			a.Action = append(a.Action, &Action{TkActionSeverity, strconv.Itoa(severity)})
+		} else if severity, err := strconv.Atoi(arg); err == nil && severity >= 0 && severity <= 7 {
+			a.Action = append(a.Action, &Action{TkActionSeverity, strconv.Itoa(severity)})
+		} else {
+			return fmt.Errorf("unknown severity %s", arg)
+		}
+		return
+	},
+	TkActionT: func(a *Actions, arg string) (err error) {
+		arg = trimQuote(arg)
+		if tt, has := transformationMap[arg]; has {
+			a.Trans = append(a.Trans, &Trans{tt})
+		} else {
+			return fmt.Errorf("unknown trans formation %s", arg)
+		}
+		return
+	},
+	TkActionPhase: func(a *Actions, arg string) (err error) {
+		arg = trimQuote(arg)
+		p, has := phaseAlias[arg]
+		if has {
+			a.Phase = p
+			return
+		}
+		p, err = strconv.Atoi(arg)
+		if err != nil {
+			return fmt.Errorf("cannot parse phase %s, err: %s", arg, err.Error())
+		}
+		if p < PhaseRequestHeaders || p > PhaseLogging {
+			return fmt.Errorf("unsupported phase %d", p)
+		}
+		a.Phase = p
+		return
+	},
+	TkActionTag: func(a *Actions, arg string) (err error) {
+		arg = trimQuote(arg)
+		a.Action = append(a.Action, &Action{TkActionTag, arg})
+		return
+	},
+	TkActionMsg: func(a *Actions, arg string) (err error) {
+		arg = trimQuote(arg)
+		a.Action = append(a.Action, &Action{TkActionMsg, arg})
+		return
+	},
+}
+
+func processAction(a *Actions, str string) error {
+	tk, arg, err := parseAction(str)
+	if err != nil {
+		return err
+	}
+	if processor, has := actionProcessors[tk]; has {
+		if err = processor(a, arg); err != nil {
+			return err
+		}
+		return nil
+	}
+	a.Action = append(a.Action, &Action{tk, arg})
+	return nil
+}
+
 func (s *Scanner) ReadActions() (*Actions, error) {
 	res := new(Actions)
 	str, err := s.ReadString()
@@ -252,53 +328,11 @@ func (s *Scanner) ReadActions() (*Actions, error) {
 	if len(str) == 0 {
 		return nil, errors.New("expected actions bug got empty")
 	}
-	acts := strings.Split(str, ",")
-	for _, act := range acts {
-		switch tk, arg, err := parseAction(act); tk {
-		case 0:
+	actions := strings.Split(str, ",")
+	for _, action := range actions {
+		err := processAction(res, action)
+		if err != nil {
 			return nil, err
-		case TkActionId:
-			arg = trimQuote(arg)
-			res.Id, err = strconv.Atoi(arg)
-			if err != nil {
-				return nil, fmt.Errorf("cannot parse id %s, err: %s", arg, err.Error())
-			}
-		case TkActionSeverity:
-			arg = trimQuote(arg)
-			if severity, has := severityMap[arg]; has {
-				res.Action = append(res.Action, &Action{tk, strconv.Itoa(severity)})
-			} else if severity, err := strconv.Atoi(arg); err == nil && severity >= 0 && severity <= 7 {
-				res.Action = append(res.Action, &Action{tk, strconv.Itoa(severity)})
-			} else {
-				return nil, fmt.Errorf("unknown severity %s", arg)
-			}
-		case TkActionT:
-			arg = trimQuote(arg)
-			if tt, has := transformationMap[arg]; has {
-				res.Trans = append(res.Trans, &Trans{tt})
-			} else {
-				return nil, fmt.Errorf("unknown trans formation %s", arg)
-			}
-		case TkActionPhase:
-			arg = trimQuote(arg)
-			p, has := phaseAlias[arg]
-			if has {
-				res.Phase = p
-				continue
-			}
-			p, err = strconv.Atoi(arg)
-			if err != nil {
-				return nil, fmt.Errorf("cannot parse phase %s, err: %s", arg, err.Error())
-			}
-			if p < PhaseRequestHeaders || p > PhaseLogging {
-				return nil, fmt.Errorf("unsupported phase %d", p)
-			}
-			res.Phase = p
-		case TkActionTag, TkActionMsg:
-			arg = trimQuote(arg)
-			res.Action = append(res.Action, &Action{tk, arg})
-		default:
-			res.Action = append(res.Action, &Action{tk, arg})
 		}
 	}
 	return res, nil
