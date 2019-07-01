@@ -9,8 +9,31 @@ import (
 )
 
 var variableFactorys map[int]VariableFactory = map[int]VariableFactory{
-	parser.TkVarRequestUri: variableNoArgErrWrapper(variables.NewVariableRequestURI),
-	parser.TkVarArgsGet:    variableNoArgErrWrapper(variables.NewVariableArgsGet),
+	parser.TkVarArgs:                  variableNoArgErrWrapper(variables.NewVariableArgs),
+	parser.TkVarArgsNames:             variableNoArgErrWrapper(variables.NewVariableArgsNames),
+	parser.TkVarArgsGet:               variableNoArgErrWrapper(variables.NewVariableArgsGet),
+	parser.TkVarArgsGetNames:          variableNoArgErrWrapper(variables.NewVariableArgsGetNames),
+	parser.TkVarArgsPost:              variableNoArgErrWrapper(variables.NewVariableArgsPost),
+	parser.TkVarArgsPostNames:         variableNoArgErrWrapper(variables.NewVariableArgsPostNames),
+	parser.TkVarQueryString:           variableNoArgErrWrapper(variables.NewVariableQueryString),
+	parser.TkVarRemoteAddr:            variableNoArgErrWrapper(variables.NewVariableRemoteAddr),
+	parser.TkVarRequestBasename:       variableNoArgErrWrapper(variables.NewVariableRequestBasename),
+	parser.TkVarRequestBody:           variableNoArgErrWrapper(variables.NewVariableRequestBody),
+	parser.TkVarRequestCookies:        variableNoArgErrWrapper(variables.NewVariableRequestCookies),
+	parser.TkVarRequestCookiesNames:   variableNoArgErrWrapper(variables.NewVariableRequestCookiesNames),
+	parser.TkVarRequestFilename:       variableNoArgErrWrapper(variables.NewVariableRequestFilename),
+	parser.TkVarRequestHeaders:        variableNoArgErrWrapper(variables.NewVariableRequestHeaders),
+	parser.TkVarRequestHeadersNames:   variableNoArgErrWrapper(variables.NewVariableRequestHeadersNames),
+	parser.TkVarRequestMethod:         variableNoArgErrWrapper(variables.NewVariableRequestMethod),
+	parser.TkVarRequestProtocol:       variableNoArgErrWrapper(variables.NewVariableRequestProtocol),
+	parser.TkVarRequestUri:            variableNoArgErrWrapper(variables.NewVariableRequestURI),
+	parser.TkVarResponseBody:          variableNoArgErrWrapper(variables.NewVariableResponseBody),
+	parser.TkVarResponseContentLength: variableNoArgErrWrapper(variables.NewVariableResponseContentLength),
+	parser.TkVarResponseContentType:   variableNoArgErrWrapper(variables.NewVariableResponseContentType),
+	parser.TkVarResponseHeaders:       variableNoArgErrWrapper(variables.NewVariableResponseHeaders),
+	parser.TkVarResponseHeadersNames:  variableNoArgErrWrapper(variables.NewVariableResponseHeadersNames),
+	parser.TkVarResponseProtocol:      variableNoArgErrWrapper(variables.NewVariableResponseProtocol),
+	parser.TkVarResponseStatus:        variableNoArgErrWrapper(variables.NewVariableResponseStatus),
 }
 
 func variableNoArgErrWrapper(f func() modsecurity.Variable) func(v *parser.Variable) (modsecurity.Variable, error) {
