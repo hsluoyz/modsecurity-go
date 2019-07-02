@@ -9,7 +9,9 @@ import (
 )
 
 var transFactorys map[int]TransFactory = map[int]TransFactory{
-	parser.TkTransLowercase: transNoArgErrWrapper(transforms.NewTransLowerCase),
+	parser.TkTransLowercase:    transNoArgErrWrapper(transforms.NewTransLowerCase),
+	parser.TkTransUrlDecode:    transNoArgErrWrapper(transforms.NewTransUrlDecode),
+	parser.TkTransUrlDecodeUni: transNoArgErrWrapper(transforms.NewTransUrlDecodeUni),
 }
 
 func transNoArgErrWrapper(f func() modsecurity.Trans) func(v *parser.Trans) (modsecurity.Trans, error) {
