@@ -9,6 +9,10 @@ func TestTransLowerCase(t *testing.T) {
 		"ABC": "abc",
 	}
 	tf := NewTransLowerCase()
+	if tf.Name() != "lowercase" {
+		t.Errorf("unexpect transform name %s", tf.Name())
+		return
+	}
 	for input, expect := range inputs {
 		res := tf.Trans(input)
 		if res != expect {
