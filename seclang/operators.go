@@ -10,6 +10,11 @@ import (
 
 var operatorFactorys map[int]OperatorFactory = map[int]OperatorFactory{
 	parser.TkOpRx: operatorWrapper(operators.NewOperatorRx),
+	parser.TkOpEq: operatorWrapper(operators.NewOperatorEq),
+	parser.TkOpGt: operatorWrapper(operators.NewOperatorGt),
+	parser.TkOpGe: operatorWrapper(operators.NewOperatorGe),
+	parser.TkOpLt: operatorWrapper(operators.NewOperatorLt),
+	parser.TkOpLe: operatorWrapper(operators.NewOperatorLe),
 }
 
 func operatorWrapper(f func(string) (modsecurity.Operator, error)) func(v *parser.Operator) (modsecurity.Operator, error) {
