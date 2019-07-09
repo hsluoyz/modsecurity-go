@@ -23,6 +23,7 @@ type SecRule struct {
 	Operator  Operator
 	Actions   []Action
 	Not       bool
+	MetaData  map[string]string
 }
 
 func (r *SecRule) AppendVariables(vs ...Variable) {
@@ -85,12 +86,14 @@ func (r *SecRule) Do(t *Transaction) {
 
 func NewSecRuleSet() *SecRuleSet {
 	return &SecRuleSet{
-		Phases: make(map[int][]*SecRule),
+		Phases:   make(map[int][]*SecRule),
+		MetaData: make(map[string]string),
 	}
 }
 
 type SecRuleSet struct {
-	Phases map[int][]*SecRule
+	Phases   map[int][]*SecRule
+	MetaData map[string]string
 }
 
 func (rs *SecRuleSet) AddRules(rules ...*SecRule) {
