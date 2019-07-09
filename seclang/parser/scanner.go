@@ -290,16 +290,6 @@ var actionProcessors = map[int]func(*Actions, string) error{
 		a.Phase = p
 		return
 	},
-	TkActionTag: func(a *Actions, arg string) (err error) {
-		arg = trimQuote(arg)
-		a.Action = append(a.Action, &Action{TkActionTag, arg})
-		return
-	},
-	TkActionMsg: func(a *Actions, arg string) (err error) {
-		arg = trimQuote(arg)
-		a.Action = append(a.Action, &Action{TkActionMsg, arg})
-		return
-	},
 }
 
 func processAction(a *Actions, str string) error {

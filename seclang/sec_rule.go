@@ -20,6 +20,12 @@ func (*DireRule) Token() int {
 	return parser.TkDirRule
 }
 
+func newDireRule() *DireRule {
+	return &DireRule{
+		modsecurity.NewSecRule(),
+	}
+}
+
 func (r *DireRule) FromSecLang(d parser.Directive) (Dire, error) {
 	if d.Token() != r.Token() {
 		return nil, fmt.Errorf("DireRule expect directive with token %d, but %d", r.Token(), d.Token())
@@ -40,21 +46,16 @@ func (r *DireRule) FromSecLang(d parser.Directive) (Dire, error) {
 	if err != nil {
 		return nil, err
 	}
-	actions, err := MakeActions(dd.Actions.Action)
+	dr := newDireRule()
+	dr.rule.Not = dd.Operator.Not
+	dr.rule.Operator = operator
+	dr.rule.Trans = trans
+	dr.rule.Variables = variables
+	err = dr.applyActions(dd.Actions)
 	if err != nil {
 		return nil, err
 	}
-	return &DireRule{
-		&modsecurity.SecRule{
-			Id:        dd.Actions.Id,
-			Phase:     dd.Actions.Phase,
-			Not:       dd.Operator.Not,
-			Variables: variables,
-			Trans:     trans,
-			Operator:  operator,
-			Actions:   actions,
-		},
-	}, nil
+	return dr, nil
 }
 
 func (r *DireRule) Execute(e *modsecurity.Engine) error {
