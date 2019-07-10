@@ -44,7 +44,7 @@ func variableNoArgErrWrapper(f func() modsecurity.Variable) func(v *parser.Varia
 
 type VariableFactory func(*parser.Variable) (modsecurity.Variable, error)
 
-func MakeVariables(vs []*parser.Variable) ([]modsecurity.Variable, error) {
+func (dr *DireRule) applyVariables(vs []*parser.Variable) error {
 	var (
 		has      bool
 		err      error
@@ -56,19 +56,19 @@ func MakeVariables(vs []*parser.Variable) ([]modsecurity.Variable, error) {
 	for _, v := range vs {
 		factory, has = variableFactorys[v.Tk]
 		if !has {
-			return nil, fmt.Errorf("variable %d is not implemented", v.Tk)
+			return fmt.Errorf("variable %d is not implemented", v.Tk)
 		}
 		if !v.Count {
 			if variable, has = varMap[v.Tk]; !has {
 				if variable, err = factory(v); err != nil {
-					return nil, err
+					return err
 				}
 				varMap[v.Tk] = variable
 			}
 		} else {
 			if variable, has = countVarMap[v.Tk]; !has {
 				if variable, err = factory(v); err != nil {
-					return nil, err
+					return err
 				}
 				countVarMap[v.Tk] = variables.NewCountVariable(variable)
 			}
@@ -77,22 +77,21 @@ func MakeVariables(vs []*parser.Variable) ([]modsecurity.Variable, error) {
 			if !v.Exclusion {
 				err := variable.Include(v.Index)
 				if err != nil {
-					return nil, err
+					return err
 				}
 			} else {
 				err := variable.Exclude(v.Index)
 				if err != nil {
-					return nil, err
+					return err
 				}
 			}
 		}
 	}
-	var res []modsecurity.Variable
 	for _, variable := range varMap {
-		res = append(res, variable)
+		dr.rule.Variables = append(dr.rule.Variables, variable)
 	}
 	for _, variable := range countVarMap {
-		res = append(res, variable)
+		dr.rule.Variables = append(dr.rule.Variables, variable)
 	}
-	return res, nil
+	return nil
 }

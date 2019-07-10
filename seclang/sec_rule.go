@@ -34,23 +34,22 @@ func (r *DireRule) FromSecLang(d parser.Directive) (Dire, error) {
 	if !ok {
 		return nil, fmt.Errorf("DireRule can't accpet directive %#v", d)
 	}
-	variables, err := MakeVariables(dd.Variable)
-	if err != nil {
-		return nil, err
-	}
-	trans, err := MakeTrans(dd.Actions.Trans)
-	if err != nil {
-		return nil, err
-	}
-	operator, err := MakeOperator(dd.Operator)
-	if err != nil {
-		return nil, err
-	}
 	dr := newDireRule()
-	dr.rule.Not = dd.Operator.Not
-	dr.rule.Operator = operator
-	dr.rule.Trans = trans
-	dr.rule.Variables = variables
+	err := dr.applyVariables(dd.Variable)
+	if err != nil {
+		return nil, err
+	}
+
+	err = dr.applyTrans(dd.Actions.Trans)
+	if err != nil {
+		return nil, err
+	}
+
+	err = dr.applyOperator(dd.Operator)
+	if err != nil {
+		return nil, err
+	}
+
 	err = dr.applyActions(dd.Actions)
 	if err != nil {
 		return nil, err

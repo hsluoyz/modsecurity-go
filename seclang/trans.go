@@ -8,7 +8,7 @@ import (
 	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
-var transFactorys map[int]TransFactory = map[int]TransFactory{
+var transFactorys map[int]transFactory = map[int]transFactory{
 	parser.TkTransLowercase:          transNoArgErrWrapper(transforms.NewTransLowerCase),
 	parser.TkTransUrlDecode:          transNoArgErrWrapper(transforms.NewTransUrlDecode),
 	parser.TkTransUrlDecodeUni:       transNoArgErrWrapper(transforms.NewTransUrlDecodeUni),
@@ -25,20 +25,19 @@ func transNoArgErrWrapper(f func() modsecurity.Trans) func(v *parser.Trans) (mod
 	}
 }
 
-type TransFactory func(*parser.Trans) (modsecurity.Trans, error)
+type transFactory func(*parser.Trans) (modsecurity.Trans, error)
 
-func MakeTrans(transes []*parser.Trans) ([]modsecurity.Trans, error) {
-	var res []modsecurity.Trans
+func (dr *DireRule) applyTrans(transes []*parser.Trans) error {
 	for _, trans := range transes {
 		factory, has := transFactorys[trans.Tk]
 		if !has {
-			return nil, fmt.Errorf("transform function %d is not implemented", trans.Tk)
+			return fmt.Errorf("transform function %d is not implemented", trans.Tk)
 		}
 		a, err := factory(trans)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		res = append(res, a)
+		dr.rule.Trans = append(dr.rule.Trans, a)
 	}
-	return res, nil
+	return nil
 }

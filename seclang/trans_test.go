@@ -10,6 +10,7 @@ import (
 
 func TestMakeTrans(t *testing.T) {
 	t.Run("lowercase", func(t *testing.T) {
+		dr := newDireRule()
 		input := `t:lowercase`
 		scan := parser.NewSecLangScanner(strings.NewReader(input))
 		parsed, err := scan.ReadActions()
@@ -17,11 +18,12 @@ func TestMakeTrans(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		trans, err := MakeTrans(parsed.Trans)
+		err = dr.applyTrans(parsed.Trans)
 		if err != nil {
 			t.Error(err)
 			return
 		}
+		trans := dr.rule.Trans
 		if len(trans) != 1 {
 			t.Error("expect one trans")
 			return

@@ -8,7 +8,7 @@ import (
 	"github.com/senghoo/modsecurity-go/seclang/parser"
 )
 
-var operatorFactorys map[int]OperatorFactory = map[int]OperatorFactory{
+var operatorFactorys map[int]operatorFactory = map[int]operatorFactory{
 	parser.TkOpRx: operatorWrapper(operators.NewOperatorRx),
 	parser.TkOpEq: operatorWrapper(operators.NewOperatorEq),
 	parser.TkOpGt: operatorWrapper(operators.NewOperatorGt),
@@ -23,12 +23,18 @@ func operatorWrapper(f func(string) (modsecurity.Operator, error)) func(v *parse
 	}
 }
 
-type OperatorFactory func(*parser.Operator) (modsecurity.Operator, error)
+type operatorFactory func(*parser.Operator) (modsecurity.Operator, error)
 
-func MakeOperator(o *parser.Operator) (modsecurity.Operator, error) {
+func (dr *DireRule) applyOperator(o *parser.Operator) error {
+	var err error
 	factory, has := operatorFactorys[o.Tk]
 	if !has {
-		return nil, fmt.Errorf("variable %d is not implemented", o.Tk)
+		return fmt.Errorf("variable %d is not implemented", o.Tk)
 	}
-	return factory(o)
+	dr.rule.Operator, err = factory(o)
+	if err != nil {
+		return err
+	}
+	dr.rule.Not = o.Not
+	return nil
 }

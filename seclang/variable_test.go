@@ -12,6 +12,7 @@ import (
 
 func TestMakeVariables(t *testing.T) {
 	t.Run("REQUEST_URI", func(t *testing.T) {
+		dr := newDireRule()
 		input := `REQUEST_URI`
 		scan := parser.NewSecLangScanner(strings.NewReader(input))
 		vs, err := scan.ReadVariables()
@@ -19,11 +20,12 @@ func TestMakeVariables(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		vars, err := MakeVariables(vs)
+		err = dr.applyVariables(vs)
 		if err != nil {
 			t.Error(err)
 			return
 		}
+		vars := dr.rule.Variables
 		if len(vars) != 1 {
 			t.Error("expect one variable")
 			return
@@ -36,6 +38,7 @@ func TestMakeVariables(t *testing.T) {
 	})
 
 	t.Run("count REQUEST_URI", func(t *testing.T) {
+		dr := newDireRule()
 		input := `&REQUEST_URI`
 		scan := parser.NewSecLangScanner(strings.NewReader(input))
 		vs, err := scan.ReadVariables()
@@ -43,11 +46,12 @@ func TestMakeVariables(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		vars, err := MakeVariables(vs)
+		err = dr.applyVariables(vs)
 		if err != nil {
 			t.Error(err)
 			return
 		}
+		vars := dr.rule.Variables
 		if len(vars) != 1 {
 			t.Error("expect one variable")
 			return

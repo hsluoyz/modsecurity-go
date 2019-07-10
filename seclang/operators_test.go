@@ -10,6 +10,7 @@ import (
 
 func TestMakeOperator(t *testing.T) {
 	t.Run("test @rx without @rx", func(t *testing.T) {
+		dr := newDireRule()
 		input := `"some regex"`
 		scan := parser.NewSecLangScanner(strings.NewReader(input))
 		parsed, err := scan.ReadOperator()
@@ -17,16 +18,16 @@ func TestMakeOperator(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		operator, err := MakeOperator(parsed)
+		err = dr.applyOperator(parsed)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		if operator == nil {
+		if dr.rule.Operator == nil {
 			t.Error("not get operator")
 			return
 		}
-		rx, ok := operator.(*operators.OperatorRx)
+		rx, ok := dr.rule.Operator.(*operators.OperatorRx)
 		if !ok {
 			t.Errorf("except VariableRequestURI got %#v", rx)
 			return
@@ -39,6 +40,7 @@ func TestMakeOperator(t *testing.T) {
 	})
 
 	t.Run("test @rx", func(t *testing.T) {
+		dr := newDireRule()
 		input := `"@rx nikto"`
 		scan := parser.NewSecLangScanner(strings.NewReader(input))
 		parsed, err := scan.ReadOperator()
@@ -46,16 +48,16 @@ func TestMakeOperator(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		operator, err := MakeOperator(parsed)
+		err = dr.applyOperator(parsed)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		if operator == nil {
+		if dr.rule.Operator == nil {
 			t.Error("not get operator")
 			return
 		}
-		rx, ok := operator.(*operators.OperatorRx)
+		rx, ok := dr.rule.Operator.(*operators.OperatorRx)
 		if !ok {
 			t.Errorf("except VariableRequestURI got %#v", rx)
 			return
