@@ -26,7 +26,7 @@ type transAppendString struct {
 func (*transAppendString) Name() string {
 	return "APPEND_STRING"
 }
-func (t *transAppendString) Trans(s string) string {
+func (t *transAppendString) Trans(tr *Transaction, s string) string {
 	return s + t.val
 }
 
@@ -41,7 +41,7 @@ func (o *operatorEq) Args() string {
 	return o.val
 }
 
-func (o *operatorEq) Match(s string) bool {
+func (o *operatorEq) Match(tr *Transaction, s string) bool {
 	return o.val == s
 }
 

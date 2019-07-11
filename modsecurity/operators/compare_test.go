@@ -43,7 +43,7 @@ func TestOperatorEq(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -77,7 +77,7 @@ func TestOperatorEq(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -111,7 +111,7 @@ func TestOperatorEq(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -158,7 +158,7 @@ func TestOperatorGe(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -192,7 +192,7 @@ func TestOperatorGe(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -226,7 +226,7 @@ func TestOperatorGe(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -273,7 +273,7 @@ func TestOperatorGt(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -307,7 +307,7 @@ func TestOperatorGt(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -341,7 +341,7 @@ func TestOperatorGt(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -388,7 +388,7 @@ func TestOperatorLt(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -422,7 +422,7 @@ func TestOperatorLt(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -456,7 +456,7 @@ func TestOperatorLt(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -503,7 +503,7 @@ func TestOperatorLe(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -537,7 +537,7 @@ func TestOperatorLe(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}
@@ -571,7 +571,7 @@ func TestOperatorLe(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}

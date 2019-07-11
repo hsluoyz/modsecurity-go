@@ -45,9 +45,9 @@ func (r *SecRule) SetOperator(o Operator) {
 	r.Operator = o
 }
 
-func (r *SecRule) TransformString(s string) string {
+func (r *SecRule) TransformString(tr *Transaction, s string) string {
 	for _, t := range r.Trans {
-		s = t.Trans(s)
+		s = t.Trans(tr, s)
 	}
 	return s
 }
@@ -55,7 +55,7 @@ func (r *SecRule) TransformString(s string) string {
 func (r *SecRule) TransformVariable(t *Transaction, variable Variable) []string {
 	var res []string
 	for _, v := range variable.Fetch(t) {
-		res = append(res, r.TransformString(v))
+		res = append(res, r.TransformString(t, v))
 	}
 	return res
 }
@@ -73,7 +73,7 @@ func (r *SecRule) Match(t *Transaction) bool {
 		if t.Abort {
 			return false
 		}
-		if r.Not != r.Operator.Match(v) {
+		if r.Not != r.Operator.Match(t, v) {
 			return true
 		}
 	}
@@ -138,13 +138,13 @@ type Variable interface {
 
 type Trans interface {
 	Name() string
-	Trans(string) string
+	Trans(*Transaction, string) string
 }
 
 type Operator interface {
 	Name() string
 	Args() string
-	Match(string) bool
+	Match(*Transaction, string) bool
 }
 
 type Action interface {

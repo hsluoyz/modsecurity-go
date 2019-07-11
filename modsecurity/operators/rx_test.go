@@ -35,7 +35,7 @@ func TestOperatorRx(t *testing.T) {
 			return
 		}
 		for input, expect := range inputs {
-			res := op.Match(input)
+			res := op.Match(nil, input)
 			if res != expect {
 				t.Errorf("input '%s' got unexpected res %t", input, res)
 			}

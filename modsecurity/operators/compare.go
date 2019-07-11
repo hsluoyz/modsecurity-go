@@ -61,7 +61,7 @@ func (o *OperatorCompare) Args() string {
 	return o.argString
 }
 
-func (o *OperatorCompare) Match(s string) bool {
+func (o *OperatorCompare) Match(tr *modsecurity.Transaction, s string) bool {
 	s = strings.TrimSpace(s)
 	v, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {

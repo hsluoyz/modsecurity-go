@@ -15,6 +15,6 @@ func NewTransLowerCase() modsecurity.Trans {
 func (*TransLowerCase) Name() string {
 	return "lowercase"
 }
-func (*TransLowerCase) Trans(s string) string {
+func (*TransLowerCase) Trans(tr *modsecurity.Transaction, s string) string {
 	return strings.ToLower(s)
 }

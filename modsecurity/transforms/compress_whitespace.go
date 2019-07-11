@@ -16,7 +16,7 @@ func NewTransCompressWhitespace() modsecurity.Trans {
 func (t *TransCompressWhitespace) Name() string {
 	return "compressWhitespace"
 }
-func (t *TransCompressWhitespace) Trans(s string) string {
+func (t *TransCompressWhitespace) Trans(tr *modsecurity.Transaction, s string) string {
 	var previousIsSpace bool
 	return strings.Map(func(i rune) rune {
 		if i == ' ' {

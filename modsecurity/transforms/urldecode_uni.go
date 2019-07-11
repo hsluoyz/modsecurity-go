@@ -14,7 +14,7 @@ func NewTransUrlDecodeUni() modsecurity.Trans {
 func (*TransUrlDecodeUni) Name() string {
 	return "urlDecodeUni"
 }
-func (*TransUrlDecodeUni) Trans(s string) string {
+func (*TransUrlDecodeUni) Trans(tr *modsecurity.Transaction, s string) string {
 	res, _ := utils.UrlDecodeUni(s)
 	return res
 }

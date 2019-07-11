@@ -14,7 +14,7 @@ func TestTransLowerCase(t *testing.T) {
 		return
 	}
 	for input, expect := range inputs {
-		res := tf.Trans(input)
+		res := tf.Trans(nil, input)
 		if res != expect {
 			t.Errorf("input %s got unexpected out %s", input, res)
 		}

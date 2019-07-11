@@ -14,7 +14,7 @@ func TestTransNone(t *testing.T) {
 		return
 	}
 	for _, expect := range inputs {
-		res := tf.Trans(expect)
+		res := tf.Trans(nil, expect)
 		if res != expect {
 			t.Errorf("input %s got unexpected out %s", expect, res)
 		}

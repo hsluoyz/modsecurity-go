@@ -13,6 +13,6 @@ func NewTransNone() modsecurity.Trans {
 func (*TransNone) Name() string {
 	return "none"
 }
-func (*TransNone) Trans(s string) string {
+func (*TransNone) Trans(tr *modsecurity.Transaction, s string) string {
 	return s
 }

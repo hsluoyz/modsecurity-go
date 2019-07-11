@@ -29,6 +29,6 @@ func (o *OperatorRx) Args() string {
 	return o.re
 
 }
-func (o *OperatorRx) Match(s string) bool {
+func (o *OperatorRx) Match(tr *modsecurity.Transaction, s string) bool {
 	return o.match.MatchString(s)
 }

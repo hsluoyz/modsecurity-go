@@ -44,6 +44,6 @@ func replaceRune(from, to rune) func(rune) rune {
 func (t *TransMapRune) Name() string {
 	return t.name
 }
-func (t *TransMapRune) Trans(s string) string {
+func (t *TransMapRune) Trans(tr *modsecurity.Transaction, s string) string {
 	return strings.Map(t.mapping, s)
 }
