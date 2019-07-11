@@ -7,12 +7,13 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Transaction struct {
 	RuleSet *SecRuleSet
 	Engine  *Engine
-	Phase   int
 	Abort   bool
 	*NetInfo
 	*Request
@@ -20,7 +21,14 @@ type Transaction struct {
 	*Errors
 	VariableCache map[string]interface{}
 	intervention  *Intervention
+	// status
+	currentPhase int
+	currentRule  int
+	nextRule     int
 }
+
+const StatusNotStarted = -1
+const StatusEndOfRules = -2
 
 type NetInfo struct {
 	SrcIp   string
@@ -69,16 +77,84 @@ func NewTransaction(e *Engine, rs *SecRuleSet) (*Transaction, error) {
 		Response:      &Response{Body: resBody},
 		Errors:        &Errors{},
 		VariableCache: make(map[string]interface{}),
+		currentPhase:  PhaseBegin,
+		currentRule:   StatusNotStarted,
+		nextRule:      0,
 	}, nil
 }
 
+func (s *Transaction) CurrentPhaseRules() []*SecRule {
+	if s.currentPhase < PhaseBegin || s.currentPhase > PhaseEnd {
+		return nil
+	}
+	return s.RuleSet.Phases[s.currentPhase]
+}
+
+func (s *Transaction) Next() int {
+	s.currentRule = s.nextRule
+	s.nextRule++
+	if len(s.RuleSet.Phases[s.currentPhase]) <= s.nextRule {
+		s.nextRule = StatusEndOfRules
+	}
+	return s.currentRule
+}
+func (s *Transaction) NextRule() int {
+	return s.nextRule
+}
+
+func (s *Transaction) CurrentRule() int {
+	return s.currentRule
+}
+
+func (s *Transaction) JumpTo(i int) int {
+	if len(s.RuleSet.Phases[s.currentPhase]) <= i {
+		return StatusEndOfRules
+	}
+	s.nextRule = i
+	return i
+}
+
+func (s *Transaction) CurrentPhase() int {
+	return s.currentPhase
+}
+
+func (s *Transaction) JumpToPhase(i int) int {
+	switch {
+	case i < PhaseBegin:
+		i = PhaseBegin
+	case i >= PhaseEnd:
+		i = PhaseEnd
+	}
+	s.currentPhase = i
+	s.currentRule = StatusNotStarted
+	s.nextRule = 0
+	return i
+}
+
 func (t *Transaction) ProcessPhase(phase int) {
-	t.Phase = phase
-	t.RuleSet.ProcessPhase(t, phase)
+	if t.currentPhase >= phase {
+		return
+	}
+	t.JumpToPhase(phase)
+	t.processPhase(phase)
+}
+
+func (t *Transaction) processPhase(phase int) {
+	if t.Abort {
+		return
+	}
+	next := t.Next()
+	for ; t.currentPhase == phase && next != StatusEndOfRules; next = t.Next() {
+		t.RuleSet.Process(t, phase, next)
+		if t.Intervention().Disruptive {
+			logrus.Debug("skiping this phase, already intercepted")
+			break
+		}
+
+	}
 }
 
 func (t *Transaction) ProcessConnection(srcIp, srcPort, dstIp, dstPort string) {
-	t.Phase = PhaseRequestHeaders
 	t.SrcIp = srcIp
 	t.SrcPort = srcPort
 	t.DstIp = dstIp
@@ -161,7 +237,7 @@ func (t *Transaction) Result() *Intervention {
 
 func (t *Transaction) Logf(f string, val ...interface{}) {
 	buffer := bytes.NewBuffer(nil)
-	fmt.Fprintf(buffer, "[client %s:%s] (phase %d) ", t.SrcIp, t.SrcPort, t.Phase)
+	fmt.Fprintf(buffer, "[client %s:%s] (phase %d) ", t.SrcIp, t.SrcPort, t.CurrentPhase())
 	fmt.Fprintf(buffer, f, val...)
 	i := t.Intervention()
 	i.Log = append(i.Log, buffer.String())

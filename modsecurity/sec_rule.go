@@ -112,20 +112,14 @@ func (rs *SecRuleSet) AddRules(rules ...*SecRule) {
 	}
 }
 
-func (rs *SecRuleSet) ProcessPhase(t *Transaction, phase int) {
-	if t.Abort {
-		return
-	}
+func (rs *SecRuleSet) Process(t *Transaction, phase int, offset int) {
+	logrus.Debugf("running phase %d rule %d", phase, offset)
 	if rs.Phases == nil {
 		return
 	}
-	logrus.Debugf("running phase %d ", phase)
-	for _, rule := range rs.Phases[phase] {
-		rule.Do(t)
-		if t.Intervention().Disruptive {
-			logrus.Debug("skiping this phase, already intercepted")
-			break
-		}
+	p := rs.Phases[phase]
+	if len(p) > offset {
+		p[offset].Do(t)
 	}
 }
 
