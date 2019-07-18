@@ -130,6 +130,9 @@ func (s *Transaction) JumpToPhase(i int) int {
 	s.nextRule = 0
 	return i
 }
+func (t *Transaction) NextPhase() int {
+	return t.JumpToPhase(t.CurrentPhase() + 1)
+}
 
 func (t *Transaction) ProcessPhase(phase int) {
 	if t.currentPhase >= phase {

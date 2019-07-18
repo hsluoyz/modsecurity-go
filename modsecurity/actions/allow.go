@@ -22,10 +22,12 @@ func (a *ActionAllow) Value() string {
 
 }
 func (a *ActionAllow) Do(t *modsecurity.Transaction) {
-	i := t.Intervention()
-	if i.Status == 200 {
-		i.Status = 403
+	switch a.arg {
+	case "":
+		t.JumpToPhase(modsecurity.PhaseLogging)
+	case "phase":
+		t.NextPhase()
+	case "request":
+		t.JumpToPhase(modsecurity.PhaseResponseHeaders)
 	}
-	i.Disruptive = true
-	t.Logf("ModSecurity: Access denied with code 403")
 }
