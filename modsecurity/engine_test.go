@@ -52,6 +52,9 @@ type actionLog struct {
 func (*actionLog) Name() string {
 	return "deny"
 }
+func (*actionLog) ActionGroup() int {
+	return ActionGroupNonDisruptive
+}
 
 func (a *actionLog) Value() string {
 	return a.log
