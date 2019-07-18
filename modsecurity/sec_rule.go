@@ -97,7 +97,12 @@ func NewSecRuleSet() *SecRuleSet {
 }
 
 type SecRuleSet struct {
-	Phases map[int][]*SecRule
+	Phases         map[int][]*SecRule
+	DefaultActions []Action
+}
+
+func (rs *SecRuleSet) AddDefaultActions(rules ...Action) {
+	rs.DefaultActions = append(rs.DefaultActions, rules...)
 }
 
 func (rs *SecRuleSet) AddRules(rules ...*SecRule) {
