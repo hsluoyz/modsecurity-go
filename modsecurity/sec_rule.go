@@ -85,8 +85,18 @@ func (r *SecRule) Do(t *Transaction) {
 	if !r.Match(t) {
 		return
 	}
-	for _, action := range r.Actions {
-		action.Do(t)
+	ActionsExecute(t, r.Actions)
+}
+
+func ActionsExecute(t *Transaction, as []Action) {
+	actionMap := make([][]Action, ActionGroupCount)
+	for _, a := range as {
+		actionMap[a.ActionGroup()] = append(actionMap[a.ActionGroup()], a)
+	}
+	for _, actions := range actionMap {
+		for _, action := range actions {
+			action.Do(t)
+		}
 	}
 }
 
@@ -99,6 +109,10 @@ func NewSecRuleSet() *SecRuleSet {
 type SecRuleSet struct {
 	Phases         map[int][]*SecRule
 	DefaultActions []Action
+}
+
+func (rs *SecRuleSet) ExecuteDefaultActions(t *Transaction) {
+	ActionsExecute(t, rs.DefaultActions)
 }
 
 func (rs *SecRuleSet) AddDefaultActions(rules ...Action) {
@@ -146,8 +160,18 @@ type Operator interface {
 	Match(*Transaction, string) bool
 }
 
+const (
+	ActionGroupMetaData = iota
+	ActionGroupData
+	ActionGroupNonDisruptive
+	ActionGroupDisruptive
+	ActionGroupFlow
+	ActionGroupCount
+)
+
 type Action interface {
 	Name() string
 	Value() string
 	Do(*Transaction)
+	ActionGroup() int
 }

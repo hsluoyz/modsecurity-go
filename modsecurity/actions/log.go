@@ -10,6 +10,9 @@ func NewActionLog() modsecurity.Action {
 	return &ActionLog{}
 }
 
+func (*ActionLog) ActionGroup() int {
+	return modsecurity.ActionGroupNonDisruptive
+}
 func (*ActionLog) Name() string {
 	return "log"
 }

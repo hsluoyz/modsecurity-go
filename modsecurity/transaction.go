@@ -25,6 +25,7 @@ type Transaction struct {
 	currentPhase int
 	currentRule  int
 	nextRule     int
+	Data         map[string]interface{}
 }
 
 const StatusNotStarted = -1
@@ -80,6 +81,7 @@ func NewTransaction(e *Engine, rs *SecRuleSet) (*Transaction, error) {
 		currentPhase:  PhaseBegin,
 		currentRule:   StatusNotStarted,
 		nextRule:      0,
+		Data:          make(map[string]interface{}),
 	}, nil
 }
 

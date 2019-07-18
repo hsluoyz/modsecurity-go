@@ -10,6 +10,10 @@ func NewActionBlock() modsecurity.Action {
 	return &ActionBlock{}
 }
 
+func (*ActionBlock) ActionGroup() int {
+	return modsecurity.ActionGroupDisruptive
+}
+
 func (*ActionBlock) Name() string {
 	return "block"
 }
@@ -21,7 +25,5 @@ func (*ActionBlock) Do(t *modsecurity.Transaction) {
 	if t.RuleSet == nil {
 		return
 	}
-	for _, action := range t.RuleSet.DefaultActions {
-		action.Do(t)
-	}
+	t.RuleSet.ExecuteDefaultActions(t)
 }

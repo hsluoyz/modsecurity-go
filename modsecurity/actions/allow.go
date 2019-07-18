@@ -13,6 +13,9 @@ func NewActionAllow(arg string) modsecurity.Action {
 		arg: arg,
 	}
 }
+func (*ActionAllow) ActionGroup() int {
+	return modsecurity.ActionGroupDisruptive
+}
 
 func (*ActionAllow) Name() string {
 	return "allow"
