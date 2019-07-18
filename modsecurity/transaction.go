@@ -106,6 +106,18 @@ func (s *Transaction) CurrentRule() int {
 	return s.currentRule
 }
 
+func (s *Transaction) CurrentSecRule() *SecRule {
+	cp := s.CurrentPhaseRules()
+	if cp == nil {
+		return nil
+	}
+	cur := s.CurrentRule()
+	if len(cp) <= cur || cur < 0 {
+		return nil
+	}
+	return cp[cur]
+}
+
 func (s *Transaction) JumpTo(i int) int {
 	if len(s.RuleSet.Phases[s.currentPhase]) <= i {
 		return StatusEndOfRules
