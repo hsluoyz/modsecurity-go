@@ -94,6 +94,9 @@ func (s *Transaction) CurrentPhaseRules() []*SecRule {
 
 func (s *Transaction) Next() int {
 	s.currentRule = s.nextRule
+	if s.currentRule == StatusEndOfRules {
+		return StatusEndOfRules
+	}
 	s.nextRule++
 	if len(s.RuleSet.Phases[s.currentPhase]) <= s.nextRule {
 		s.nextRule = StatusEndOfRules
@@ -122,6 +125,7 @@ func (s *Transaction) CurrentSecRule() *SecRule {
 
 func (s *Transaction) JumpTo(i int) int {
 	if len(s.RuleSet.Phases[s.currentPhase]) <= i {
+		s.nextRule = StatusEndOfRules
 		return StatusEndOfRules
 	}
 	s.nextRule = i

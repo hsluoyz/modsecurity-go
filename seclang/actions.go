@@ -13,6 +13,9 @@ var actionFactorys map[int]*actionProcessor = map[int]*actionProcessor{
 	parser.TkActionDeny: &actionProcessor{
 		factory: actionWrapper(actions.NewActionDeny),
 	},
+	parser.TkActionSkip: &actionProcessor{
+		factory: actionWrapper(actions.NewActionSkip),
+	},
 	parser.TkActionLog: &actionProcessor{
 		factory: actionWrapper(actions.NewActionLog),
 	},
