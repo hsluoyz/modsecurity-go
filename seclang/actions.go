@@ -2,6 +2,7 @@ package seclang
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/senghoo/modsecurity-go/modsecurity"
 	"github.com/senghoo/modsecurity-go/modsecurity/actions"
@@ -10,7 +11,19 @@ import (
 
 var actionFactorys map[int]*actionProcessor = map[int]*actionProcessor{
 	parser.TkActionDeny: &actionProcessor{
-		factory: actionNoArgErrWrapper(actions.NewActionDeny),
+		factory: actionWrapper(actions.NewActionDeny),
+	},
+	parser.TkActionLog: &actionProcessor{
+		factory: actionWrapper(actions.NewActionLog),
+	},
+	parser.TkActionBlock: &actionProcessor{
+		factory: actionWrapper(actions.NewActionBlock),
+	},
+	parser.TkActionStatus: &actionProcessor{
+		factory: actionNumArgWrapper(actions.NewActionStatus),
+	},
+	parser.TkActionAllow: &actionProcessor{
+		factory: actionArgWrapper(actions.NewActionAllow),
 	},
 	parser.TkActionTag: &actionProcessor{
 		meta: metaFactory("tag"),
@@ -34,6 +47,11 @@ func trimQuote(s string) string {
 	return s
 }
 
+func toNum(s string) (int, error) {
+	s = trimQuote(s)
+	return strconv.Atoi(s)
+}
+
 func metaFactory(name string) func(*parser.Action) (map[string]string, error) {
 	return func(parsed *parser.Action) (map[string]string, error) {
 		res := make(map[string]string)
@@ -42,7 +60,22 @@ func metaFactory(name string) func(*parser.Action) (map[string]string, error) {
 	}
 }
 
-func actionNoArgErrWrapper(f func() modsecurity.Action) func(v *parser.Action) (modsecurity.Action, error) {
+func actionArgWrapper(f func(string) modsecurity.Action) func(v *parser.Action) (modsecurity.Action, error) {
+	return func(v *parser.Action) (modsecurity.Action, error) {
+		return f(trimQuote(v.Argument)), nil
+	}
+}
+func actionNumArgWrapper(f func(int) modsecurity.Action) func(v *parser.Action) (modsecurity.Action, error) {
+	return func(v *parser.Action) (modsecurity.Action, error) {
+		arg, err := toNum(v.Argument)
+		if err != nil {
+			return nil, err
+		}
+		return f(arg), nil
+	}
+}
+
+func actionWrapper(f func() modsecurity.Action) func(v *parser.Action) (modsecurity.Action, error) {
 	return func(v *parser.Action) (modsecurity.Action, error) {
 		return f(), nil
 	}
