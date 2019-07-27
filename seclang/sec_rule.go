@@ -13,7 +13,8 @@ func init() {
 
 // DireRequestBodyAccess
 type DireRule struct {
-	rule *modsecurity.SecRule
+	rule  *modsecurity.SecRule
+	chain bool
 }
 
 func (*DireRule) Token() int {
@@ -22,7 +23,7 @@ func (*DireRule) Token() int {
 
 func newDireRule() *DireRule {
 	return &DireRule{
-		modsecurity.NewSecRule(),
+		rule: modsecurity.NewSecRule(),
 	}
 }
 

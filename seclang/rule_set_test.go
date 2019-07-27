@@ -88,3 +88,34 @@ func TestRuleSet(t *testing.T) {
 		}
 	})
 }
+
+func TestRuleSetChain(t *testing.T) {
+	rule := `
+SecRule REQUEST_URI '@rx cmd' \
+    "id:123,\
+    phase:2,\
+    t:lowercase,\
+    chain,\
+    deny"
+    SecRule ARGS_POST '@rx abc' log,chain
+        SecRule ARGS_GET '@rx xyz' status:403
+`
+	rs, err := NewDireSetFromSecLangString(rule)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(rs.dires) != 1 {
+		t.Errorf("expect one dire but got %d", len(rs.dires))
+		return
+	}
+	dr, ok := rs.dires[0].(*DireRule)
+	if !ok {
+		t.Errorf("expect DireRule but got %#v", rs.dires[0])
+		return
+	}
+	if len(dr.rule.SubRules) != 2 {
+		t.Errorf("expect 2 subdire but got %d", len(dr.rule.SubRules))
+		return
+	}
+}

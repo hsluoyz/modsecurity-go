@@ -92,6 +92,7 @@ type actionProcessor struct {
 func (dr *DireRule) applyActions(actions *parser.Actions) error {
 	dr.rule.Id = actions.Id
 	dr.rule.Phase = actions.Phase
+	dr.chain = actions.Chain
 	for _, action := range actions.Action {
 		processor, has := actionFactorys[action.Tk]
 		if !has {

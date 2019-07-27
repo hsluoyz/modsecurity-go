@@ -290,6 +290,10 @@ var actionProcessors = map[int]func(*Actions, string) error{
 		a.Phase = p
 		return
 	},
+	TkActionChain: func(a *Actions, arg string) (err error) {
+		a.Chain = true
+		return
+	},
 }
 
 func processAction(a *Actions, str string) error {
@@ -532,6 +536,7 @@ type Trans struct {
 type Actions struct {
 	Id     int
 	Phase  int
+	Chain  bool
 	Trans  []*Trans
 	Action []*Action
 }

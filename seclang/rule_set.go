@@ -43,6 +43,7 @@ type DireSet struct {
 }
 
 func (rs *DireSet) AddSecLangString(str string) error {
+	var chainParent *DireRule
 	scanner := parser.NewSecLangScannerFromString(str)
 	dirs, err := scanner.AllDirective()
 	if err != nil {
@@ -52,6 +53,19 @@ func (rs *DireSet) AddSecLangString(str string) error {
 		dire, err := direFactory(dir)
 		if err != nil {
 			return err
+		}
+		if dr, ok := dire.(*DireRule); ok {
+			parent := chainParent // keep old parent
+			if !dr.chain {        // chain end or normal rule
+				chainParent = nil
+			} else if chainParent == nil { // new chain start
+				chainParent = dr
+			} // else keep old chain
+
+			if parent != nil {
+				parent.rule.AppendSubRules(dr.rule)
+				continue // skip append dire
+			}
 		}
 		rs.dires = append(rs.dires, dire)
 	}

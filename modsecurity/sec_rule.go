@@ -24,6 +24,7 @@ type SecRule struct {
 	Actions   []Action
 	Not       bool
 	MetaData  map[string][]string
+	SubRules  []*SecRule
 }
 
 func NewSecRule() *SecRule {
@@ -43,6 +44,10 @@ func (r *SecRule) AppendTrans(vs ...Trans) {
 }
 func (r *SecRule) SetOperator(o Operator) {
 	r.Operator = o
+}
+
+func (r *SecRule) AppendSubRules(sub ...*SecRule) {
+	r.SubRules = append(r.SubRules, sub...)
 }
 
 func (r *SecRule) TransformString(tr *Transaction, s string) string {
@@ -85,7 +90,15 @@ func (r *SecRule) Do(t *Transaction) {
 	if !r.Match(t) {
 		return
 	}
+	for _, sub := range r.SubRules {
+		if !sub.Match(t) {
+			return
+		}
+	}
 	ActionsExecute(t, r.Actions)
+	for _, sub := range r.SubRules {
+		ActionsExecute(t, sub.Actions)
+	}
 }
 
 func ActionsExecute(t *Transaction, as []Action) {
