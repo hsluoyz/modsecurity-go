@@ -232,6 +232,12 @@ func (t *Transaction) Intervention() *Intervention {
 	}
 	return t.intervention
 }
+func (t *Transaction) ResetIntervention() {
+	if t.intervention == nil {
+		t.intervention = new(Intervention)
+	}
+	t.intervention.Reset()
+}
 
 func (t *Transaction) AbortWithError(code int, err error) {
 	t.Abort = true
