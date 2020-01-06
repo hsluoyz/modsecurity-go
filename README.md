@@ -132,10 +132,10 @@ For full example see [Parser Example](https://github.com/senghoo/modsecurity-go/
 
 ```
 
-import "github.com/senghoo/modsecurity-go/libmodsecurity/seclang"
+import "github.com/senghoo/modsecurity-go/seclang/parser"
 
 var rules = `<<<some modsecurity rules>>`
-scaner := seclang.NewSecLangScannerFromString(rules)
+scaner := parser.NewSecLangScannerFromString(rules)
 d, err := scaner.AllDirective()
 if err != nil {
 	panic(err)
