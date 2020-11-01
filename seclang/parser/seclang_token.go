@@ -36,6 +36,7 @@ const (
 	TkVarRequestMethod
 	TkVarRequestProtocol
 	TkVarRequestUri
+	TkVarRequestLine
 	TkVarResponseBody
 	TkVarResponseContentLength
 	TkVarResponseContentType
@@ -44,6 +45,9 @@ const (
 	TkVarResponseProtocol
 	TkVarResponseStatus
 	TkVarXML
+	TkVarTx
+	TkVarFilesNames
+	TkVarFiles
 	// operator
 	TkOpRx
 	TkOpEq
@@ -51,6 +55,10 @@ const (
 	TkOpGt
 	TkOpLe
 	TkOpLt
+	TkOpValidateUrlEncoding
+	TkOpValidateUtf8Encoding
+	TkOpValidateByteRange
+	TkOpPm
 	// actions
 	TkActionAllow
 	TkActionMsg
@@ -59,12 +67,14 @@ const (
 	TkActionRev
 	TkActionSeverity
 	TkActionLog
+	TkActionNoLog
 	TkActionDeny
 	TkActionBlock
 	TkActionStatus
 	TkActionpHase
 	TkActionT
 	TkActionSkip
+	TkActionSkipAfter
 	TkActionChain
 	TkActionPhase
 	TkActionVer
@@ -85,34 +95,40 @@ const (
 )
 
 var operatorMap = map[string]int{
-	"rx": TkOpRx,
-	"eq": TkOpEq,
-	"ge": TkOpGe,
-	"gt": TkOpGt,
-	"le": TkOpLe,
-	"lt": TkOpLt,
+	"rx":                   TkOpRx,
+	"eq":                   TkOpEq,
+	"ge":                   TkOpGe,
+	"gt":                   TkOpGt,
+	"le":                   TkOpLe,
+	"lt":                   TkOpLt,
+	"validateUrlEncoding":  TkOpValidateUrlEncoding,
+	"validateUtf8Encoding": TkOpValidateUtf8Encoding,
+	"validateByteRange":    TkOpValidateByteRange,
+	"pm":                   TkOpPm,
 }
 
 var actionMap = map[string]int{
-	"allow":    TkActionAllow,
-	"msg":      TkActionMsg,
-	"id":       TkActionId,
-	"tag":      TkActionTag,
-	"rev":      TkActionRev,
-	"ver":      TkActionVer,
-	"severity": TkActionSeverity,
-	"log":      TkActionLog,
-	"deny":     TkActionDeny,
-	"block":    TkActionBlock,
-	"status":   TkActionStatus,
-	"phase":    TkActionPhase,
-	"t":        TkActionT,
-	"skip":     TkActionSkip,
-	"chain":    TkActionChain,
-	"logdata":  TkActionLogData,
-	"setvar":   TkActionSetVar,
-	"capture":  TkActionCapture,
-	"pass":     TkActionPass,
+	"allow":     TkActionAllow,
+	"msg":       TkActionMsg,
+	"id":        TkActionId,
+	"tag":       TkActionTag,
+	"rev":       TkActionRev,
+	"ver":       TkActionVer,
+	"severity":  TkActionSeverity,
+	"log":       TkActionLog,
+	"nolog":     TkActionNoLog,
+	"deny":      TkActionDeny,
+	"block":     TkActionBlock,
+	"status":    TkActionStatus,
+	"phase":     TkActionPhase,
+	"t":         TkActionT,
+	"skip":      TkActionSkip,
+	"skipAfter": TkActionSkipAfter,
+	"chain":     TkActionChain,
+	"logdata":   TkActionLogData,
+	"setvar":    TkActionSetVar,
+	"capture":   TkActionCapture,
+	"pass":      TkActionPass,
 }
 var transformationMap = map[string]int{
 	"lowercase":          TkTransLowercase,
@@ -144,6 +160,7 @@ var variableMap = map[string]int{
 	"REQUEST_METHOD":          TkVarRequestMethod,
 	"REQUEST_PROTOCOL":        TkVarRequestProtocol,
 	"REQUEST_URI":             TkVarRequestUri,
+	"REQUEST_LINE":            TkVarRequestLine,
 	"RESPONSE_BODY":           TkVarResponseBody,
 	"RESPONSE_CONTENT_LENGTH": TkVarResponseContentLength,
 	"RESPONSE_CONTENT_TYPE":   TkVarResponseContentType,
@@ -152,6 +169,9 @@ var variableMap = map[string]int{
 	"RESPONSE_PROTOCOL":       TkVarResponseProtocol,
 	"RESPONSE_STATUS":         TkVarResponseStatus,
 	"XML":                     TkVarXML,
+	"TX":                      TkVarTx,
+	"FILES_NAMES":             TkVarFilesNames,
+	"FILES":                   TkVarFiles,
 }
 
 var severityMap = map[string]int{
