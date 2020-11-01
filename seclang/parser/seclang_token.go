@@ -23,6 +23,7 @@ const (
 	TkVarArgsGetNames
 	TkVarArgsPost
 	TkVarArgsPostNames
+	TkVarArgsCombinedSize
 	TkVarArgsNames
 	TkVarQueryString
 	TkVarRemoteAddr
@@ -48,6 +49,7 @@ const (
 	TkVarTx
 	TkVarFilesNames
 	TkVarFiles
+	TkVarFilesCombinedSize
 	// operator
 	TkOpRx
 	TkOpEq
@@ -59,6 +61,8 @@ const (
 	TkOpValidateUtf8Encoding
 	TkOpValidateByteRange
 	TkOpPm
+	TkOpWithin
+	TkOpEndsWith
 	// actions
 	TkActionAllow
 	TkActionMsg
@@ -82,6 +86,7 @@ const (
 	TkActionSetVar
 	TkActionCapture
 	TkActionPass
+	TkActionCtl
 	// transform action
 	TkTransLowercase
 	TkTransUrlDecode
@@ -91,6 +96,8 @@ const (
 	TkTransRemoveWhitespace
 	TkTransReplaceNulls
 	TkTransRemoveNulls
+	TkTransLength
+	TkTransHtmlEntityDecode
 	TkEND
 )
 
@@ -105,6 +112,8 @@ var operatorMap = map[string]int{
 	"validateUtf8Encoding": TkOpValidateUtf8Encoding,
 	"validateByteRange":    TkOpValidateByteRange,
 	"pm":                   TkOpPm,
+	"within":               TkOpWithin,
+	"endsWith":             TkOpEndsWith,
 }
 
 var actionMap = map[string]int{
@@ -129,6 +138,7 @@ var actionMap = map[string]int{
 	"setvar":    TkActionSetVar,
 	"capture":   TkActionCapture,
 	"pass":      TkActionPass,
+	"ctl":       TkActionCtl,
 }
 var transformationMap = map[string]int{
 	"lowercase":          TkTransLowercase,
@@ -139,6 +149,8 @@ var transformationMap = map[string]int{
 	"removeWhitespace":   TkTransRemoveWhitespace,
 	"replaceNulls":       TkTransReplaceNulls,
 	"removeNulls":        TkTransRemoveNulls,
+	"length":             TkTransLength,
+	"htmlEntityDecode":   TkTransHtmlEntityDecode,
 }
 
 var variableMap = map[string]int{
@@ -148,6 +160,7 @@ var variableMap = map[string]int{
 	"ARGS_GET_NAMES":          TkVarArgsGetNames,
 	"ARGS_POST":               TkVarArgsPost,
 	"ARGS_POST_NAMES":         TkVarArgsPostNames,
+	"ARGS_COMBINED_SIZE":      TkVarArgsCombinedSize,
 	"QUERY_STRING":            TkVarQueryString,
 	"REMOTE_ADDR":             TkVarRemoteAddr,
 	"REQUEST_BASENAME":        TkVarRequestBasename,
@@ -172,6 +185,7 @@ var variableMap = map[string]int{
 	"TX":                      TkVarTx,
 	"FILES_NAMES":             TkVarFilesNames,
 	"FILES":                   TkVarFiles,
+	"FILES_COMBINED_SIZE":     TkVarFilesCombinedSize,
 }
 
 var severityMap = map[string]int{
