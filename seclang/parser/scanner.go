@@ -311,6 +311,20 @@ func processAction(a *Actions, str string) error {
 	return nil
 }
 
+func mergeActions(actions []string) []string {
+	res := []string{}
+	for i := 0; i < len(actions); i++ {
+		if i < len(actions)-1 && strings.Count(actions[i], "'") == 1 && strings.Count(actions[i+1], "'") == 1 {
+			token := actions[i] + "," + actions[i+1]
+			res = append(res, token)
+			i += 1
+		} else {
+			res = append(res, actions[i])
+		}
+	}
+	return res
+}
+
 func (s *Scanner) ReadActions() (*Actions, error) {
 	res := new(Actions)
 	str, err := s.ReadString()
@@ -323,6 +337,7 @@ func (s *Scanner) ReadActions() (*Actions, error) {
 		return nil, errors.New("expected actions bug got empty")
 	}
 	actions := strings.Split(str, ",")
+	actions = mergeActions(actions)
 	for _, action := range actions {
 		err := processAction(res, action)
 		if err != nil {
