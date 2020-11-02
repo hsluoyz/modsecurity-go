@@ -314,10 +314,21 @@ func processAction(a *Actions, str string) error {
 func mergeActions(actions []string) []string {
 	res := []string{}
 	for i := 0; i < len(actions); i++ {
-		if i < len(actions)-1 && strings.Count(actions[i], "'") == 1 && strings.Count(actions[i+1], "'") == 1 {
-			token := actions[i] + "," + actions[i+1]
-			res = append(res, token)
-			i += 1
+		if strings.Count(actions[i], "'") == 1 {
+			flag := false
+			for j := i + 1; j < len(actions); j++ {
+				if strings.Count(actions[j], "'") == 1 {
+					token := strings.Join(actions[i:j+1], ",")
+					res = append(res, token)
+					i = j
+					flag = true
+					break
+				}
+			}
+
+			if !flag {
+				panic("mergeActions(): should not be here")
+			}
 		} else {
 			res = append(res, actions[i])
 		}
