@@ -334,7 +334,9 @@ func (s *Scanner) ReadActions() (*Actions, error) {
 	str = strings.TrimSpace(str)
 	// str = strings.Trim(str, "\r\n\t\f\v ")
 	if len(str) == 0 {
-		return nil, errors.New("expected actions bug got empty")
+		// chain rule in REQUEST-910-IP-REPUTATION.conf
+		return nil, nil
+		//return nil, errors.New("expected actions bug got empty")
 	}
 	actions := strings.Split(str, ",")
 	actions = mergeActions(actions)

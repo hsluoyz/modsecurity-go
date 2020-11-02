@@ -37,7 +37,9 @@ const (
 	TkVarRequestMethod
 	TkVarRequestProtocol
 	TkVarRequestUri
+	TkVarRequestUriRaw
 	TkVarRequestLine
+	TkVarReqBodyProcessor
 	TkVarResponseBody
 	TkVarResponseContentLength
 	TkVarResponseContentType
@@ -50,6 +52,12 @@ const (
 	TkVarFilesNames
 	TkVarFiles
 	TkVarFilesCombinedSize
+	TkVarUniqueId
+	TkVarDuration
+	TkVarIp
+	TkVarGeo
+	TkVarMatchedVars
+	TkVarMatchedVarsNames
 	// operator
 	TkOpRx
 	TkOpEq
@@ -61,8 +69,17 @@ const (
 	TkOpValidateUtf8Encoding
 	TkOpValidateByteRange
 	TkOpPm
+	TkOpPmFromFile
 	TkOpWithin
+	TkOpBeginsWith
 	TkOpEndsWith
+	TkOpContains
+	TkOpStrEq
+	TkOpIpMatch
+	TkOpGeoLookup
+	TkOpRbl
+	TkOpDetectXss
+	TkOpDetectSqli
 	// actions
 	TkActionAllow
 	TkActionMsg
@@ -87,6 +104,11 @@ const (
 	TkActionCapture
 	TkActionPass
 	TkActionCtl
+	TkActionAuditLog
+	TkActionNoAuditLog
+	TkActionExpireVar
+	TkActionDrop
+	TkActionMultiMatch
 	// transform action
 	TkTransLowercase
 	TkTransUrlDecode
@@ -98,6 +120,18 @@ const (
 	TkTransRemoveNulls
 	TkTransLength
 	TkTransHtmlEntityDecode
+	TkTransSha1
+	TkTransHexEncode
+	TkTransUtf8toUnicode
+	TkTransCmdLine
+	TkTransNormalisePath
+	TkTransNormalizePath
+	TkTransNormalizePathWin
+	TkTransReplaceComments
+	TkTransRemoveComments
+	TkTransBase64Decode
+	TkTransJsDecode
+	TkTransCssDecode
 	TkEND
 )
 
@@ -112,33 +146,47 @@ var operatorMap = map[string]int{
 	"validateUtf8Encoding": TkOpValidateUtf8Encoding,
 	"validateByteRange":    TkOpValidateByteRange,
 	"pm":                   TkOpPm,
+	"pmFromFile":           TkOpPmFromFile,
 	"within":               TkOpWithin,
+	"beginsWith":           TkOpBeginsWith,
 	"endsWith":             TkOpEndsWith,
+	"contains":             TkOpContains,
+	"streq":                TkOpStrEq,
+	"ipMatch":              TkOpIpMatch,
+	"geoLookup":            TkOpGeoLookup,
+	"rbl":                  TkOpRbl,
+	"detectXSS":            TkOpDetectXss,
+	"detectSQLi":           TkOpDetectSqli,
 }
 
 var actionMap = map[string]int{
-	"allow":     TkActionAllow,
-	"msg":       TkActionMsg,
-	"id":        TkActionId,
-	"tag":       TkActionTag,
-	"rev":       TkActionRev,
-	"ver":       TkActionVer,
-	"severity":  TkActionSeverity,
-	"log":       TkActionLog,
-	"nolog":     TkActionNoLog,
-	"deny":      TkActionDeny,
-	"block":     TkActionBlock,
-	"status":    TkActionStatus,
-	"phase":     TkActionPhase,
-	"t":         TkActionT,
-	"skip":      TkActionSkip,
-	"skipAfter": TkActionSkipAfter,
-	"chain":     TkActionChain,
-	"logdata":   TkActionLogData,
-	"setvar":    TkActionSetVar,
-	"capture":   TkActionCapture,
-	"pass":      TkActionPass,
-	"ctl":       TkActionCtl,
+	"allow":      TkActionAllow,
+	"msg":        TkActionMsg,
+	"id":         TkActionId,
+	"tag":        TkActionTag,
+	"rev":        TkActionRev,
+	"ver":        TkActionVer,
+	"severity":   TkActionSeverity,
+	"log":        TkActionLog,
+	"nolog":      TkActionNoLog,
+	"deny":       TkActionDeny,
+	"block":      TkActionBlock,
+	"status":     TkActionStatus,
+	"phase":      TkActionPhase,
+	"t":          TkActionT,
+	"skip":       TkActionSkip,
+	"skipAfter":  TkActionSkipAfter,
+	"chain":      TkActionChain,
+	"logdata":    TkActionLogData,
+	"setvar":     TkActionSetVar,
+	"capture":    TkActionCapture,
+	"pass":       TkActionPass,
+	"ctl":        TkActionCtl,
+	"auditlog":   TkActionAuditLog,
+	"noauditlog": TkActionNoAuditLog,
+	"expirevar":  TkActionExpireVar,
+	"drop":       TkActionDrop,
+	"multiMatch": TkActionMultiMatch,
 }
 var transformationMap = map[string]int{
 	"lowercase":          TkTransLowercase,
@@ -151,6 +199,18 @@ var transformationMap = map[string]int{
 	"removeNulls":        TkTransRemoveNulls,
 	"length":             TkTransLength,
 	"htmlEntityDecode":   TkTransHtmlEntityDecode,
+	"sha1":               TkTransSha1,
+	"hexEncode":          TkTransHexEncode,
+	"utf8toUnicode":      TkTransUtf8toUnicode,
+	"cmdLine":            TkTransCmdLine,
+	"normalisePath":      TkTransNormalisePath,
+	"normalizePath":      TkTransNormalizePath,
+	"normalizePathWin":   TkTransNormalizePathWin,
+	"replaceComments":    TkTransReplaceComments,
+	"removeComments":     TkTransRemoveComments,
+	"base64Decode":       TkTransBase64Decode,
+	"jsDecode":           TkTransJsDecode,
+	"cssDecode":          TkTransCssDecode,
 }
 
 var variableMap = map[string]int{
@@ -173,7 +233,9 @@ var variableMap = map[string]int{
 	"REQUEST_METHOD":          TkVarRequestMethod,
 	"REQUEST_PROTOCOL":        TkVarRequestProtocol,
 	"REQUEST_URI":             TkVarRequestUri,
+	"REQUEST_URI_RAW":         TkVarRequestUriRaw,
 	"REQUEST_LINE":            TkVarRequestLine,
+	"REQBODY_PROCESSOR":       TkVarReqBodyProcessor,
 	"RESPONSE_BODY":           TkVarResponseBody,
 	"RESPONSE_CONTENT_LENGTH": TkVarResponseContentLength,
 	"RESPONSE_CONTENT_TYPE":   TkVarResponseContentType,
@@ -186,6 +248,12 @@ var variableMap = map[string]int{
 	"FILES_NAMES":             TkVarFilesNames,
 	"FILES":                   TkVarFiles,
 	"FILES_COMBINED_SIZE":     TkVarFilesCombinedSize,
+	"UNIQUE_ID":               TkVarUniqueId,
+	"DURATION":                TkVarDuration,
+	"IP":                      TkVarIp,
+	"GEO":                     TkVarGeo,
+	"MATCHED_VARS":            TkVarMatchedVars,
+	"MATCHED_VARS_NAMES":      TkVarMatchedVarsNames,
 }
 
 var severityMap = map[string]int{
