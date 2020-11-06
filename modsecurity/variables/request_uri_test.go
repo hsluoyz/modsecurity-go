@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 func TestVariableRequestURI(t *testing.T) {

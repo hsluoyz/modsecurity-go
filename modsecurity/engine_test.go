@@ -3,7 +3,7 @@ package modsecurity
 import (
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/utils"
+	"github.com/hsluoyz/modsecurity-go/utils"
 )
 
 type variableConst struct {

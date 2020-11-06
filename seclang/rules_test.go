@@ -3,7 +3,7 @@ package seclang
 import (
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 func TestRules(t *testing.T) {

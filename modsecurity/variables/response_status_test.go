@@ -3,7 +3,7 @@ package variables
 import (
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 func TestVariableResponseStatus(t *testing.T) {

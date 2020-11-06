@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity/actions"
-	"github.com/senghoo/modsecurity-go/seclang/parser"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/actions"
+	"github.com/hsluoyz/modsecurity-go/seclang/parser"
 )
 
 func TestApplyActions(t *testing.T) {

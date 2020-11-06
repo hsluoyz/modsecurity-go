@@ -3,9 +3,9 @@ package seclang
 import (
 	"fmt"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
-	"github.com/senghoo/modsecurity-go/modsecurity/transforms"
-	"github.com/senghoo/modsecurity-go/seclang/parser"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/transforms"
+	"github.com/hsluoyz/modsecurity-go/seclang/parser"
 )
 
 var transFactorys map[int]transFactory = map[int]transFactory{

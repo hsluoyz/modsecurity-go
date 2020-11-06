@@ -1,6 +1,6 @@
 package variables
 
-import "github.com/senghoo/modsecurity-go/modsecurity"
+import "github.com/hsluoyz/modsecurity-go/modsecurity"
 
 func NewVariableRequestHeaders() modsecurity.Variable {
 	return &VariableRequestHeaders{

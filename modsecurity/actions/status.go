@@ -3,7 +3,7 @@ package actions
 import (
 	"strconv"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 type ActionStatus struct {

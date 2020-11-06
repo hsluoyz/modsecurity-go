@@ -3,7 +3,7 @@ package actions
 import (
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 func TestAllow(t *testing.T) {

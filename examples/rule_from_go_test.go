@@ -4,10 +4,10 @@ import (
 	"net/url"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/senghoo/modsecurity-go/modsecurity"
-	"github.com/senghoo/modsecurity-go/modsecurity/actions"
-	"github.com/senghoo/modsecurity-go/modsecurity/operators"
-	"github.com/senghoo/modsecurity-go/modsecurity/variables"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/actions"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/operators"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/variables"
 )
 
 func ExampleRuleFromGo() {

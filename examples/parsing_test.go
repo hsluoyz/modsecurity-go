@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/senghoo/modsecurity-go/seclang/parser"
-	"github.com/senghoo/modsecurity-go/utils"
+	"github.com/hsluoyz/modsecurity-go/seclang/parser"
+	"github.com/hsluoyz/modsecurity-go/utils"
 )
 
 var rules = `

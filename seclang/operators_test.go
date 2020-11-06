@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity/operators"
-	"github.com/senghoo/modsecurity-go/seclang/parser"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/operators"
+	"github.com/hsluoyz/modsecurity-go/seclang/parser"
 )
 
 func TestMakeOperator(t *testing.T) {

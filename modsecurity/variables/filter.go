@@ -3,7 +3,7 @@ package variables
 import (
 	"regexp"
 
-	"github.com/senghoo/modsecurity-go/utils"
+	"github.com/hsluoyz/modsecurity-go/utils"
 )
 
 type filter struct {

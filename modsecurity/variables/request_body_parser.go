@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 const (

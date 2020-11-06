@@ -3,7 +3,7 @@ package transforms
 import (
 	"strings"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 type TransLowerCase struct{}

@@ -3,7 +3,7 @@ package variables
 import (
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/utils"
+	"github.com/hsluoyz/modsecurity-go/utils"
 )
 
 func TestIsRegex(t *testing.T) {

@@ -3,7 +3,7 @@ package operators
 import (
 	"regexp"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 func NewOperatorRx(re string) (modsecurity.Operator, error) {

@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
-	"github.com/senghoo/modsecurity-go/modsecurity/variables"
-	"github.com/senghoo/modsecurity-go/seclang/parser"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/variables"
+	"github.com/hsluoyz/modsecurity-go/seclang/parser"
 )
 
 func TestMakeVariables(t *testing.T) {

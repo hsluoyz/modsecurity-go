@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity/transforms"
-	"github.com/senghoo/modsecurity-go/seclang/parser"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/transforms"
+	"github.com/hsluoyz/modsecurity-go/seclang/parser"
 )
 
 func TestMakeTrans(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"mime/multipart"
 	"net/url"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 func NewVariableArgsPost() modsecurity.Variable {

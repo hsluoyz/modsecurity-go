@@ -3,7 +3,7 @@ package variables
 import (
 	"net/http"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 func NewVariableResponseBody() modsecurity.Variable {

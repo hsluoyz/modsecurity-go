@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
-	"github.com/senghoo/modsecurity-go/utils"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/utils"
 )
 
 func TestVariableArgsPost(t *testing.T) {

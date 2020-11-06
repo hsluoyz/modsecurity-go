@@ -1,6 +1,6 @@
 package variables
 
-import "github.com/senghoo/modsecurity-go/modsecurity"
+import "github.com/hsluoyz/modsecurity-go/modsecurity"
 
 func NewVariableArgsGetNames() modsecurity.Variable {
 	return &VariableArgsGetNames{

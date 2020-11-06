@@ -4,11 +4,11 @@ This Project is work in progress. Api will be changed frequently. Not recommende
 
 # ModSecurity-Go
 
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/senghoo/modsecurity-go)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/hsluoyz/modsecurity-go)
 [![CI Status](https://travis-ci.org/senghoo/modsecurity-go.svg?branch=master)](https://travis-ci.org/senghoo/modsecurity-go)
 [![Coverage Status](https://coveralls.io/repos/github/senghoo/modsecurity-go/badge.svg?branch=master)](https://coveralls.io/github/senghoo/modsecurity-go?branch=master)
 [![codebeat badge](https://codebeat.co/badges/e6d5534b-34a4-4420-a319-e3f7245cdc0e)](https://codebeat.co/projects/github-com-senghoo-modsecurity-go-master)
-[![License](https://img.shields.io/github/license/senghoo/modsecurity-go.svg)](https://github.com/senghoo/modsecurity-go/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/senghoo/modsecurity-go.svg)](https://github.com/hsluoyz/modsecurity-go/blob/master/LICENSE)
 
 ModSecurity-Go is golang port for [ModSecurity](https://github.com/SpiderLabs/ModSecurity).
 
@@ -28,7 +28,7 @@ TODO:
 
 ## Build Rules with SecLang
 
-For full example see [Rules with SecLang Example](https://github.com/senghoo/modsecurity-go/blob/master/examples/rule_from_seclang_test.go)
+For full example see [Rules with SecLang Example](https://github.com/hsluoyz/modsecurity-go/blob/master/examples/rule_from_seclang_test.go)
 
 ```
 rule := `SecRuleEngine On
@@ -72,7 +72,7 @@ utils.Pprint(i)
 
 ## Build Rules with Go
 
-For full example see [Rules with Go Example](https://github.com/senghoo/modsecurity-go/blob/master/examples/rule_from_go_test.go)
+For full example see [Rules with Go Example](https://github.com/hsluoyz/modsecurity-go/blob/master/examples/rule_from_go_test.go)
 
 ```
 e := modsecurity.NewEngine()
@@ -128,11 +128,11 @@ pprint.Dump(i)
 
 ## Seclang Parsing
 
-For full example see [Parser Example](https://github.com/senghoo/modsecurity-go/blob/master/examples/parsing_test.go)
+For full example see [Parser Example](https://github.com/hsluoyz/modsecurity-go/blob/master/examples/parsing_test.go)
 
 ```
 
-import "github.com/senghoo/modsecurity-go/seclang/parser"
+import "github.com/hsluoyz/modsecurity-go/seclang/parser"
 
 var rules = `<<<some modsecurity rules>>`
 scaner := parser.NewSecLangScannerFromString(rules)

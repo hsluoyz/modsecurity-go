@@ -3,7 +3,7 @@ package variables
 import (
 	"mime"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 func NewVariableResponseContentType() modsecurity.Variable {

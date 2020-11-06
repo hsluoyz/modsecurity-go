@@ -3,11 +3,11 @@ package seclang
 import (
 	"testing"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
-	"github.com/senghoo/modsecurity-go/modsecurity/actions"
-	"github.com/senghoo/modsecurity-go/modsecurity/operators"
-	"github.com/senghoo/modsecurity-go/modsecurity/transforms"
-	"github.com/senghoo/modsecurity-go/modsecurity/variables"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/actions"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/operators"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/transforms"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/variables"
 )
 
 func TestSecRule(t *testing.T) {

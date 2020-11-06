@@ -1,4 +1,4 @@
-module github.com/senghoo/modsecurity-go
+module github.com/hsluoyz/modsecurity-go
 
 go 1.12
 

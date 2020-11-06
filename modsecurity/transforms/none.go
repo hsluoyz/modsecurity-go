@@ -1,7 +1,7 @@
 package transforms
 
 import (
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 type TransNone struct{}

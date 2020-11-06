@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
-	"github.com/senghoo/modsecurity-go/modsecurity/actions"
-	"github.com/senghoo/modsecurity-go/seclang/parser"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity/actions"
+	"github.com/hsluoyz/modsecurity-go/seclang/parser"
 )
 
 var actionFactorys map[int]*actionProcessor = map[int]*actionProcessor{

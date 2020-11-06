@@ -4,7 +4,7 @@ import (
 	"mime"
 	"net/http"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
 )
 
 func NewVariableRequestBody() modsecurity.Variable {

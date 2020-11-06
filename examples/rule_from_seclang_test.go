@@ -3,9 +3,9 @@ package main
 import (
 	"net/url"
 
-	"github.com/senghoo/modsecurity-go/modsecurity"
-	"github.com/senghoo/modsecurity-go/seclang"
-	"github.com/senghoo/modsecurity-go/utils"
+	"github.com/hsluoyz/modsecurity-go/modsecurity"
+	"github.com/hsluoyz/modsecurity-go/seclang"
+	"github.com/hsluoyz/modsecurity-go/utils"
 )
 
 func ExampleRuleFromSeclang() {
