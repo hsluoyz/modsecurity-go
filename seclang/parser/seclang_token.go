@@ -135,7 +135,7 @@ const (
 	TkEND
 )
 
-var operatorMap = map[string]int{
+var OperatorMap = map[string]int{
 	"rx":                   TkOpRx,
 	"eq":                   TkOpEq,
 	"ge":                   TkOpGe,
@@ -159,7 +159,7 @@ var operatorMap = map[string]int{
 	"detectSQLi":           TkOpDetectSqli,
 }
 
-var actionMap = map[string]int{
+var ActionMap = map[string]int{
 	"allow":      TkActionAllow,
 	"msg":        TkActionMsg,
 	"id":         TkActionId,
@@ -188,7 +188,7 @@ var actionMap = map[string]int{
 	"drop":       TkActionDrop,
 	"multiMatch": TkActionMultiMatch,
 }
-var transformationMap = map[string]int{
+var TransformationMap = map[string]int{
 	"lowercase":          TkTransLowercase,
 	"urlDecode":          TkTransUrlDecode,
 	"urlDecodeUni":       TkTransUrlDecodeUni,
@@ -213,7 +213,7 @@ var transformationMap = map[string]int{
 	"cssDecode":          TkTransCssDecode,
 }
 
-var variableMap = map[string]int{
+var VariableMap = map[string]int{
 	"ARGS":                    TkVarArgs,
 	"ARGS_NAMES":              TkVarArgsNames,
 	"ARGS_GET":                TkVarArgsGet,
@@ -256,7 +256,7 @@ var variableMap = map[string]int{
 	"MATCHED_VARS_NAMES":      TkVarMatchedVarsNames,
 }
 
-var severityMap = map[string]int{
+var SeverityMap = map[string]int{
 	"EMERGENCY": 0,
 	"ALERT":     1,
 	"CRITICAL":  2,
@@ -275,7 +275,7 @@ const (
 	PhaseLogging         = 5
 )
 
-var phaseAlias = map[string]int{
+var PhaseAlias = map[string]int{
 	"request":  PhaseRequestBody,
 	"response": PhaseResponseBody,
 	"logging":  PhaseLogging,
