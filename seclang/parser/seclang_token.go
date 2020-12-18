@@ -19,14 +19,30 @@ const (
 	TkValueOn
 	// variables
 	TkVarArgs
+	TkVarArgsCombinedSize
 	TkVarArgsGet
 	TkVarArgsGetNames
+	TkVarArgsNames
 	TkVarArgsPost
 	TkVarArgsPostNames
-	TkVarArgsCombinedSize
-	TkVarArgsNames
+	TkVarDuration
+	TkVarFiles
+	TkVarFilesCombinedSize
+	TkVarFilesNames
+	TkVarFilesSizes
+	TkVarFilesTmpNames
+	TkVarFilesTmpContent
+	TkVarFullRequest
+	TkVarFullRequestLength
+	TkVarMultipartFilename
+	TkVarMultipartName
+	TkVarGeo
+	TkVarIp
+	TkVarMatchedVars
+	TkVarMatchedVarsNames
 	TkVarQueryString
 	TkVarRemoteAddr
+	TkVarReqBodyProcessor
 	TkVarRequestBasename
 	TkVarRequestBody
 	TkVarRequestCookies
@@ -34,12 +50,11 @@ const (
 	TkVarRequestFilename
 	TkVarRequestHeaders
 	TkVarRequestHeadersNames
+	TkVarRequestLine
 	TkVarRequestMethod
 	TkVarRequestProtocol
 	TkVarRequestUri
 	TkVarRequestUriRaw
-	TkVarRequestLine
-	TkVarReqBodyProcessor
 	TkVarResponseBody
 	TkVarResponseContentLength
 	TkVarResponseContentType
@@ -47,17 +62,9 @@ const (
 	TkVarResponseHeadersNames
 	TkVarResponseProtocol
 	TkVarResponseStatus
-	TkVarXML
 	TkVarTx
-	TkVarFilesNames
-	TkVarFiles
-	TkVarFilesCombinedSize
 	TkVarUniqueId
-	TkVarDuration
-	TkVarIp
-	TkVarGeo
-	TkVarMatchedVars
-	TkVarMatchedVarsNames
+	TkVarXML
 	// operator
 	TkOpRx
 	TkOpEq
@@ -76,6 +83,7 @@ const (
 	TkOpContains
 	TkOpStrEq
 	TkOpIpMatch
+	TkOpIpMatchFromFile
 	TkOpGeoLookup
 	TkOpRbl
 	TkOpDetectXss
@@ -110,28 +118,42 @@ const (
 	TkActionDrop
 	TkActionMultiMatch
 	// transform action
-	TkTransLowercase
-	TkTransUrlDecode
-	TkTransUrlDecodeUni
-	TkTransNone
-	TkTransCompressWhitespace
-	TkTransRemoveWhitespace
-	TkTransReplaceNulls
-	TkTransRemoveNulls
-	TkTransLength
-	TkTransHtmlEntityDecode
-	TkTransSha1
-	TkTransHexEncode
-	TkTransUtf8toUnicode
+	TkTransBase64Decode
+	TkTransBase64Encode
 	TkTransCmdLine
+	TkTransCompressWhitespace
+	TkTransCssDecode
+	TkTransEscapeSeqDecode
+	TkTransHexDecode
+	TkTransHexEncode
+	TkTransHtmlEntityDecode
+	TkTransJsDecode
+	TkTransLength
+	TkTransLowercase
+	TkTransMd5
+	TkTransNone
 	TkTransNormalisePath
+	TkTransNormalisePathWin
 	TkTransNormalizePath
 	TkTransNormalizePathWin
-	TkTransReplaceComments
+	TkTransParityEven7bit
+	TkTransParityOdd7bit
+	TkTransParityZero7bit
 	TkTransRemoveComments
-	TkTransBase64Decode
-	TkTransJsDecode
-	TkTransCssDecode
+	TkTransRemoveCommentsChar
+	TkTransRemoveNulls
+	TkTransRemoveWhitespace
+	TkTransReplaceComments
+	TkTransReplaceNulls
+	TkTransSha1
+	TkTransSqlHexDecode
+	TkTransTrim
+	TkTransTrimLeft
+	TkTransTrimRight
+	TkTransUrlDecode
+	TkTransUrlDecodeUni
+	TkTransUrlEncode
+	TkTransUtf8toUnicode
 	TkEND
 )
 
@@ -153,6 +175,7 @@ var OperatorMap = map[string]int{
 	"contains":             TkOpContains,
 	"streq":                TkOpStrEq,
 	"ipMatch":              TkOpIpMatch,
+	"ipMatchFromFile":      TkOpIpMatchFromFile,
 	"geoLookup":            TkOpGeoLookup,
 	"rbl":                  TkOpRbl,
 	"detectXSS":            TkOpDetectXss,
@@ -189,40 +212,70 @@ var ActionMap = map[string]int{
 	"multiMatch": TkActionMultiMatch,
 }
 var TransformationMap = map[string]int{
-	"lowercase":          TkTransLowercase,
-	"urlDecode":          TkTransUrlDecode,
-	"urlDecodeUni":       TkTransUrlDecodeUni,
-	"none":               TkTransNone,
-	"compressWhitespace": TkTransCompressWhitespace,
-	"removeWhitespace":   TkTransRemoveWhitespace,
-	"replaceNulls":       TkTransReplaceNulls,
-	"removeNulls":        TkTransRemoveNulls,
-	"length":             TkTransLength,
-	"htmlEntityDecode":   TkTransHtmlEntityDecode,
-	"sha1":               TkTransSha1,
-	"hexEncode":          TkTransHexEncode,
-	"utf8toUnicode":      TkTransUtf8toUnicode,
+	"base64Decode":       TkTransBase64Decode,
+	"base64Encode":       TkTransBase64Encode,
 	"cmdLine":            TkTransCmdLine,
+	"compressWhitespace": TkTransCompressWhitespace,
+	"cssDecode":          TkTransCssDecode,
+	"escapeSeqDecode":    TkTransEscapeSeqDecode,
+	"hexDecode":          TkTransHexDecode,
+	"hexEncode":          TkTransHexEncode,
+	"htmlEntityDecode":   TkTransHtmlEntityDecode,
+	"jsDecode":           TkTransJsDecode,
+	"length":             TkTransLength,
+	"lowercase":          TkTransLowercase,
+	"md5":                TkTransMd5,
+	"none":               TkTransNone,
 	"normalisePath":      TkTransNormalisePath,
+	"normalisePathWin":   TkTransNormalisePathWin,
 	"normalizePath":      TkTransNormalizePath,
 	"normalizePathWin":   TkTransNormalizePathWin,
-	"replaceComments":    TkTransReplaceComments,
+	"parityEven7bit":     TkTransParityEven7bit,
+	"parityOdd7bit":      TkTransParityOdd7bit,
+	"parityZero7bit":     TkTransParityZero7bit,
 	"removeComments":     TkTransRemoveComments,
-	"base64Decode":       TkTransBase64Decode,
-	"jsDecode":           TkTransJsDecode,
-	"cssDecode":          TkTransCssDecode,
+	"removeCommentsChar": TkTransRemoveCommentsChar,
+	"removeNulls":        TkTransRemoveNulls,
+	"removeWhitespace":   TkTransRemoveWhitespace,
+	"replaceComments":    TkTransReplaceComments,
+	"replaceNulls":       TkTransReplaceNulls,
+	"sha1":               TkTransSha1,
+	"sqlHexDecode":       TkTransSqlHexDecode,
+	"trim":               TkTransTrim,
+	"trimLeft":           TkTransTrimLeft,
+	"trimRight":          TkTransTrimRight,
+	"urlDecode":          TkTransUrlDecode,
+	"urlDecodeUni":       TkTransUrlDecodeUni,
+	"urlEncode":          TkTransUrlEncode,
+	"utf8toUnicode":      TkTransUtf8toUnicode,
 }
 
 var VariableMap = map[string]int{
 	"ARGS":                    TkVarArgs,
-	"ARGS_NAMES":              TkVarArgsNames,
+	"ARGS_COMBINED_SIZE":      TkVarArgsCombinedSize,
 	"ARGS_GET":                TkVarArgsGet,
 	"ARGS_GET_NAMES":          TkVarArgsGetNames,
+	"ARGS_NAMES":              TkVarArgsNames,
 	"ARGS_POST":               TkVarArgsPost,
 	"ARGS_POST_NAMES":         TkVarArgsPostNames,
-	"ARGS_COMBINED_SIZE":      TkVarArgsCombinedSize,
+	"DURATION":                TkVarDuration,
+	"FILES":                   TkVarFiles,
+	"FILES_COMBINED_SIZE":     TkVarFilesCombinedSize,
+	"FILES_NAMES":             TkVarFilesNames,
+	"FILES_SIZES":             TkVarFilesSizes,
+	"FILES_TMPNAMES":          TkVarFilesTmpNames,
+	"FILES_TMP_CONTENT":       TkVarFilesTmpContent,
+	"FULL_REQUEST":            TkVarFullRequest,
+	"FULL_REQUEST_LENGTH":     TkVarFullRequestLength,
+	"MULTIPART_FILENAME":      TkVarMultipartFilename,
+	"MULTIPART_NAME":          TkVarMultipartName,
+	"GEO":                     TkVarGeo,
+	"IP":                      TkVarIp,
+	"MATCHED_VARS":            TkVarMatchedVars,
+	"MATCHED_VARS_NAMES":      TkVarMatchedVarsNames,
 	"QUERY_STRING":            TkVarQueryString,
 	"REMOTE_ADDR":             TkVarRemoteAddr,
+	"REQBODY_PROCESSOR":       TkVarReqBodyProcessor,
 	"REQUEST_BASENAME":        TkVarRequestBasename,
 	"REQUEST_BODY":            TkVarRequestBody,
 	"REQUEST_COOKIES":         TkVarRequestCookies,
@@ -230,12 +283,11 @@ var VariableMap = map[string]int{
 	"REQUEST_FILENAME":        TkVarRequestFilename,
 	"REQUEST_HEADERS":         TkVarRequestHeaders,
 	"REQUEST_HEADERS_NAMES":   TkVarRequestHeadersNames,
+	"REQUEST_LINE":            TkVarRequestLine,
 	"REQUEST_METHOD":          TkVarRequestMethod,
 	"REQUEST_PROTOCOL":        TkVarRequestProtocol,
 	"REQUEST_URI":             TkVarRequestUri,
 	"REQUEST_URI_RAW":         TkVarRequestUriRaw,
-	"REQUEST_LINE":            TkVarRequestLine,
-	"REQBODY_PROCESSOR":       TkVarReqBodyProcessor,
 	"RESPONSE_BODY":           TkVarResponseBody,
 	"RESPONSE_CONTENT_LENGTH": TkVarResponseContentLength,
 	"RESPONSE_CONTENT_TYPE":   TkVarResponseContentType,
@@ -243,17 +295,9 @@ var VariableMap = map[string]int{
 	"RESPONSE_HEADERS_NAMES":  TkVarResponseHeadersNames,
 	"RESPONSE_PROTOCOL":       TkVarResponseProtocol,
 	"RESPONSE_STATUS":         TkVarResponseStatus,
-	"XML":                     TkVarXML,
 	"TX":                      TkVarTx,
-	"FILES_NAMES":             TkVarFilesNames,
-	"FILES":                   TkVarFiles,
-	"FILES_COMBINED_SIZE":     TkVarFilesCombinedSize,
 	"UNIQUE_ID":               TkVarUniqueId,
-	"DURATION":                TkVarDuration,
-	"IP":                      TkVarIp,
-	"GEO":                     TkVarGeo,
-	"MATCHED_VARS":            TkVarMatchedVars,
-	"MATCHED_VARS_NAMES":      TkVarMatchedVarsNames,
+	"XML":                     TkVarXML,
 }
 
 var SeverityMap = map[string]int{
