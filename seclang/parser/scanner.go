@@ -195,7 +195,7 @@ func (s *Scanner) ReadVariables() ([]*Variable, error) {
 			arg.Index = a[i+1:]
 			a = a[:i]
 		}
-		tk, has := variableMap[a]
+		tk, has := VariableMap[a]
 		if !has {
 			return nil, fmt.Errorf("unknown variable %s\n", a)
 		}
@@ -233,7 +233,7 @@ func (s *Scanner) ReadOperator() (*Operator, error) {
 		res.Argument = opWithArg[1]
 	}
 	op = op[1:] // skip @
-	tk, has := operatorMap[op]
+	tk, has := OperatorMap[op]
 	if !has {
 		return nil, fmt.Errorf("expect operator got @%s", op)
 	}
@@ -255,7 +255,7 @@ var actionProcessors = map[int]func(*Actions, string) error{
 	},
 	TkActionSeverity: func(a *Actions, arg string) (err error) {
 		arg = trimQuote(arg)
-		if severity, has := severityMap[arg]; has {
+		if severity, has := SeverityMap[arg]; has {
 			a.Action = append(a.Action, &Action{TkActionSeverity, strconv.Itoa(severity)})
 		} else if severity, err := strconv.Atoi(arg); err == nil && severity >= 0 && severity <= 7 {
 			a.Action = append(a.Action, &Action{TkActionSeverity, strconv.Itoa(severity)})
@@ -266,7 +266,7 @@ var actionProcessors = map[int]func(*Actions, string) error{
 	},
 	TkActionT: func(a *Actions, arg string) (err error) {
 		arg = trimQuote(arg)
-		if tt, has := transformationMap[arg]; has {
+		if tt, has := TransformationMap[arg]; has {
 			a.Trans = append(a.Trans, &Trans{tt})
 		} else {
 			return fmt.Errorf("unknown trans formation %s", arg)
@@ -275,7 +275,7 @@ var actionProcessors = map[int]func(*Actions, string) error{
 	},
 	TkActionPhase: func(a *Actions, arg string) (err error) {
 		arg = trimQuote(arg)
-		p, has := phaseAlias[arg]
+		p, has := PhaseAlias[arg]
 		if has {
 			a.Phase = p
 			return
@@ -364,7 +364,7 @@ func parseAction(act string) (int, string, error) {
 	var arg string
 	s := strings.SplitN(act, ":", 2)
 	action := strings.TrimSpace(s[0])
-	tk, has := actionMap[action]
+	tk, has := ActionMap[action]
 	if !has {
 		return 0, "", fmt.Errorf("unknown action %s", s[0])
 	}
