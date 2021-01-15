@@ -26,6 +26,7 @@ const (
 	TkVarArgsPost
 	TkVarArgsPostNames
 	TkVarDuration
+	TkVarExtendedJSON
 	TkVarFiles
 	TkVarFilesCombinedSize
 	TkVarFilesNames
@@ -259,6 +260,7 @@ var VariableMap = map[string]int{
 	"ARGS_POST":               TkVarArgsPost,
 	"ARGS_POST_NAMES":         TkVarArgsPostNames,
 	"DURATION":                TkVarDuration,
+	"EXTENDED_JSON":           TkVarExtendedJSON,
 	"FILES":                   TkVarFiles,
 	"FILES_COMBINED_SIZE":     TkVarFilesCombinedSize,
 	"FILES_NAMES":             TkVarFilesNames,
