@@ -106,6 +106,7 @@ func (s *Scanner) readString(delimiter ...rune) (string, error) {
 			case c == EOS:
 				return "", fmt.Errorf("unexpected EOS after %s", s.buffer.String())
 			default:
+				s.save('\\')
 				s.saveAndAdvance()
 			}
 		default:
